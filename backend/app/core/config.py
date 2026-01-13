@@ -1,5 +1,5 @@
 """
-Core configuration for the ACI Dashboard API
+Core configuration for the ACI FORGE API
 Handles environment variables and application settings
 """
 
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     
     # API Configuration
     API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "ACI Dashboard API"
+    PROJECT_NAME: str = "ACI FORGE API"
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "Enterprise-grade dashboard with role-based access control"
     
@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     SMTP_USERNAME: str = os.getenv("SMTP_USERNAME", "")
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
     FROM_EMAIL: str = os.getenv("FROM_EMAIL", "")
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://acidashboard.aci.local:2005")
     
     class Config:
         case_sensitive = True

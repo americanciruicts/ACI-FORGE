@@ -65,7 +65,7 @@ export default function LoginPage() {
           }}>
             <Image
               src="/logo.jpg"
-              alt="ACI DASHBOARD"
+              alt="ACI FORGE"
               fill
               sizes="80px"
               className="object-contain rounded-lg"
@@ -77,7 +77,7 @@ export default function LoginPage() {
             color: '#111827',
             margin: 0
           }}>
-            ACI DASHBOARD LOGIN
+            ACI FORGE LOGIN
           </h1>
         </div>
 

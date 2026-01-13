@@ -5,8 +5,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ACI DASHBOARD',
-  description: 'Professional dashboard application',
+  title: 'ACI FORGE',
+  description: 'ACI FORGE - Maintenance Request System',
 }
 
 export default function RootLayout({

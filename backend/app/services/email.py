@@ -57,20 +57,20 @@ class EmailService:
             reset_url = f"{settings.FRONTEND_URL}/reset-password?token={reset_token}"
             
             # Email content
-            subject = "ACI Dashboard - Password Reset Request"
+            subject = "ACI FORGE - Password Reset Request"
             
             html_body = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb;">ACI Dashboard</h1>
+                            <h1 style="color: #2563eb;">ACI FORGE</h1>
                         </div>
                         
                         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
                             <h2 style="color: #1e40af; margin-top: 0;">Password Reset Request</h2>
                             <p>Hello {user_name},</p>
-                            <p>We received a request to reset your password for your ACI Dashboard account.</p>
+                            <p>We received a request to reset your password for your ACI FORGE account.</p>
                             <p>Click the button below to reset your password:</p>
                             
                             <div style="text-align: center; margin: 30px 0;">
@@ -98,8 +98,8 @@ class EmailService:
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
                         
                         <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                            <p>This is an automated email from ACI Dashboard. Please do not reply to this email.</p>
-                            <p>&copy; 2024 ACI Dashboard. All rights reserved.</p>
+                            <p>This is an automated email from ACI FORGE. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI FORGE. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -107,11 +107,11 @@ class EmailService:
             """
             
             text_body = f"""
-            ACI Dashboard - Password Reset Request
+            ACI FORGE - Password Reset Request
             
             Hello {user_name},
             
-            We received a request to reset your password for your ACI Dashboard account.
+            We received a request to reset your password for your ACI FORGE account.
             
             To reset your password, please visit the following link:
             {reset_url}
@@ -123,9 +123,9 @@ class EmailService:
             
             If the link doesn't work, copy and paste it into your browser.
             
-            This is an automated email from ACI Dashboard. Please do not reply to this email.
+            This is an automated email from ACI FORGE. Please do not reply to this email.
             
-            © 2024 ACI Dashboard. All rights reserved.
+            © 2024 ACI FORGE. All rights reserved.
             """
             
             return self._send_email(to_email, subject, html_body, text_body)
@@ -137,26 +137,26 @@ class EmailService:
     def send_password_changed_notification(self, to_email: str, user_name: str) -> bool:
         """Send notification when password is successfully changed"""
         try:
-            subject = "ACI Dashboard - Password Changed Successfully"
+            subject = "ACI FORGE - Password Changed Successfully"
             
             html_body = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb;">ACI Dashboard</h1>
+                            <h1 style="color: #2563eb;">ACI FORGE</h1>
                         </div>
                         
                         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #22c55e;">
                             <h2 style="color: #15803d; margin-top: 0;">Password Changed Successfully</h2>
                             <p>Hello {user_name},</p>
-                            <p>Your password has been successfully changed for your ACI Dashboard account.</p>
+                            <p>Your password has been successfully changed for your ACI FORGE account.</p>
                             <p>If you did not make this change, please contact your administrator immediately.</p>
                         </div>
                         
                         <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                            <p>This is an automated email from ACI Dashboard. Please do not reply to this email.</p>
-                            <p>&copy; 2024 ACI Dashboard. All rights reserved.</p>
+                            <p>This is an automated email from ACI FORGE. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI FORGE. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -164,17 +164,17 @@ class EmailService:
             """
             
             text_body = f"""
-            ACI Dashboard - Password Changed Successfully
+            ACI FORGE - Password Changed Successfully
             
             Hello {user_name},
             
-            Your password has been successfully changed for your ACI Dashboard account.
+            Your password has been successfully changed for your ACI FORGE account.
             
             If you did not make this change, please contact your administrator immediately.
             
-            This is an automated email from ACI Dashboard. Please do not reply to this email.
+            This is an automated email from ACI FORGE. Please do not reply to this email.
             
-            © 2024 ACI Dashboard. All rights reserved.
+            © 2024 ACI FORGE. All rights reserved.
             """
             
             return self._send_email(to_email, subject, html_body, text_body)
@@ -188,20 +188,20 @@ class EmailService:
         try:
             login_url = f"{settings.FRONTEND_URL}/login"
             
-            subject = "ACI Dashboard - Your Account Has Been Created"
+            subject = "ACI FORGE - Your Account Has Been Created"
             
             html_body = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb;">ACI Dashboard</h1>
+                            <h1 style="color: #2563eb;">ACI FORGE</h1>
                         </div>
                         
                         <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                            <h2 style="color: #1e40af; margin-top: 0;">Welcome to ACI Dashboard!</h2>
+                            <h2 style="color: #1e40af; margin-top: 0;">Welcome to ACI FORGE!</h2>
                             <p>Hello {user_name},</p>
-                            <p>An administrator has created an account for you on ACI Dashboard.</p>
+                            <p>An administrator has created an account for you on ACI FORGE.</p>
                             
                             <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; margin: 20px 0;">
                                 <h3 style="color: #0277bd; margin-top: 0;">Your Login Credentials:</h3>
@@ -217,7 +217,7 @@ class EmailService:
                                    style="background: #2563eb; color: white; padding: 12px 24px; 
                                           text-decoration: none; border-radius: 6px; display: inline-block;
                                           font-weight: bold;">
-                                    Login to ACI Dashboard
+                                    Login to ACI FORGE
                                 </a>
                             </div>
                             
@@ -237,8 +237,8 @@ class EmailService:
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
                         
                         <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                            <p>This is an automated email from ACI Dashboard. Please do not reply to this email.</p>
-                            <p>&copy; 2024 ACI Dashboard. All rights reserved.</p>
+                            <p>This is an automated email from ACI FORGE. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI FORGE. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -246,11 +246,11 @@ class EmailService:
             """
             
             text_body = f"""
-            ACI Dashboard - Your Account Has Been Created
+            ACI FORGE - Your Account Has Been Created
             
             Hello {user_name},
             
-            An administrator has created an account for you on ACI Dashboard.
+            An administrator has created an account for you on ACI FORGE.
             
             Your Login Credentials:
             Username: {username}
@@ -263,9 +263,9 @@ class EmailService:
             - Keep your credentials secure and do not share them
             - Use a strong, unique password for your account
             
-            This is an automated email from ACI Dashboard. Please do not reply to this email.
+            This is an automated email from ACI FORGE. Please do not reply to this email.
             
-            © 2024 ACI Dashboard. All rights reserved.
+            © 2024 ACI FORGE. All rights reserved.
             """
             
             return self._send_email(to_email, subject, html_body, text_body)
@@ -324,27 +324,27 @@ class EmailService:
     def send_profile_creation_notification(self, to_email: str, user_name: str, admin_name: str) -> bool:
         """Send notification when profile creation begins"""
         try:
-            subject = "🔄 ACI Dashboard - Your Account Is Being Created"
+            subject = "🔄 ACI FORGE - Your Account Is Being Created"
             
             html_body = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb;">ACI Dashboard</h1>
+                            <h1 style="color: #2563eb;">ACI FORGE</h1>
                         </div>
                         
                         <div style="background: #eff6ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
                             <h2 style="color: #1e40af; margin-top: 0;">🔄 Account Creation In Progress</h2>
                             <p>Hello {user_name},</p>
-                            <p><strong>{admin_name}</strong> is currently creating your ACI Dashboard account.</p>
+                            <p><strong>{admin_name}</strong> is currently creating your ACI FORGE account.</p>
                             
                             <div style="background: #dbeafe; padding: 15px; border-radius: 6px; margin: 20px 0;">
                                 <p style="margin: 0;"><strong>📧 What happens next:</strong></p>
                                 <ul style="margin: 10px 0;">
                                     <li>Your account is being set up with appropriate roles and tools</li>
                                     <li>You will receive another email with your login credentials shortly</li>
-                                    <li>Once complete, you'll have access to the ACI Dashboard</li>
+                                    <li>Once complete, you'll have access to the ACI FORGE</li>
                                 </ul>
                             </div>
                             
@@ -354,8 +354,8 @@ class EmailService:
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
                         
                         <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                            <p>This is an automated notification from ACI Dashboard. Please do not reply to this email.</p>
-                            <p>&copy; 2024 ACI Dashboard. All rights reserved.</p>
+                            <p>This is an automated notification from ACI FORGE. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI FORGE. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -363,22 +363,22 @@ class EmailService:
             """
             
             text_body = f"""
-            ACI Dashboard - Your Account Is Being Created
+            ACI FORGE - Your Account Is Being Created
             
             Hello {user_name},
             
-            {admin_name} is currently creating your ACI Dashboard account.
+            {admin_name} is currently creating your ACI FORGE account.
             
             What happens next:
             - Your account is being set up with appropriate roles and tools
             - You will receive another email with your login credentials shortly
-            - Once complete, you'll have access to the ACI Dashboard
+            - Once complete, you'll have access to the ACI FORGE
             
             Please wait for the completion email with your login details.
             
-            This is an automated notification from ACI Dashboard. Please do not reply to this email.
+            This is an automated notification from ACI FORGE. Please do not reply to this email.
             
-            © 2024 ACI Dashboard. All rights reserved.
+            © 2024 ACI FORGE. All rights reserved.
             """
             
             return self._send_email(to_email, subject, html_body, text_body)
@@ -392,20 +392,20 @@ class EmailService:
         try:
             login_url = f"{settings.FRONTEND_URL}/login"
             
-            subject = "🔑 ACI Dashboard - Your Account Information"
+            subject = "🔑 ACI FORGE - Your Account Information"
             
             html_body = f"""
             <html>
                 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                         <div style="text-align: center; margin-bottom: 30px;">
-                            <h1 style="color: #2563eb;">ACI Dashboard</h1>
+                            <h1 style="color: #2563eb;">ACI FORGE</h1>
                         </div>
                         
                         <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #22c55e;">
                             <h2 style="color: #15803d; margin-top: 0;">🔑 Your Account Information</h2>
                             <p>Hello {user_name},</p>
-                            <p>Here's your current ACI Dashboard account information and access details.</p>
+                            <p>Here's your current ACI FORGE account information and access details.</p>
                             
                             <div style="background: #dcfce7; padding: 15px; border-radius: 6px; margin: 20px 0;">
                                 <h3 style="color: #15803d; margin-top: 0;">Your Login Information:</h3>
@@ -422,7 +422,7 @@ class EmailService:
                                    style="background: #15803d; color: white; padding: 12px 24px; 
                                           text-decoration: none; border-radius: 6px; display: inline-block;
                                           font-weight: bold;">
-                                    Access ACI Dashboard
+                                    Access ACI FORGE
                                 </a>
                             </div>
                             
@@ -442,8 +442,8 @@ class EmailService:
                         <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
                         
                         <div style="text-align: center; color: #6b7280; font-size: 12px;">
-                            <p>This is an automated email from ACI Dashboard. Please do not reply to this email.</p>
-                            <p>&copy; 2024 ACI Dashboard. All rights reserved.</p>
+                            <p>This is an automated email from ACI FORGE. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI FORGE. All rights reserved.</p>
                         </div>
                     </div>
                 </body>
@@ -451,11 +451,11 @@ class EmailService:
             """
             
             text_body = f"""
-            ACI Dashboard - Your Account Information
+            ACI FORGE - Your Account Information
             
             Hello {user_name},
             
-            Here's your current ACI Dashboard account information and access details.
+            Here's your current ACI FORGE account information and access details.
             
             Your Login Information:
             Username: {username}
@@ -475,9 +475,9 @@ class EmailService:
             
             Access your dashboard at: {login_url}
             
-            This is an automated email from ACI Dashboard. Please do not reply to this email.
+            This is an automated email from ACI FORGE. Please do not reply to this email.
             
-            © 2024 ACI Dashboard. All rights reserved.
+            © 2024 ACI FORGE. All rights reserved.
             """
             
             return self._send_email(to_email, subject, html_body, text_body)
@@ -486,6 +486,138 @@ class EmailService:
             print(f"Error sending existing user credentials: {e}")
             return False
     
+    def send_maintenance_request_notification(self, to_emails: list, request_data: dict) -> bool:
+        """
+        Send notification to superusers when a new maintenance request is submitted
+
+        Args:
+            to_emails: List of email addresses to notify
+            request_data: Dictionary containing request information
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            request_url = f"{settings.FRONTEND_URL}/dashboard/maintenance/all-requests"
+
+            subject = f"🔧 New Maintenance Request: {request_data.get('title', 'N/A')}"
+
+            # Priority badge color
+            priority = request_data.get('priority', 'medium').lower()
+            priority_colors = {
+                'low': '#22c55e',
+                'medium': '#f59e0b',
+                'high': '#f97316',
+                'urgent': '#ef4444'
+            }
+            priority_color = priority_colors.get(priority, '#6b7280')
+
+            html_body = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #2563eb;">ACI Portal</h1>
+                        </div>
+
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid {priority_color};">
+                            <h2 style="color: #1e40af; margin-top: 0;">🔧 New Maintenance Request</h2>
+
+                            <div style="background: white; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                                <p style="margin: 5px 0;"><strong>Title:</strong> {request_data.get('title', 'N/A')}</p>
+                                <p style="margin: 5px 0;">
+                                    <strong>Priority:</strong>
+                                    <span style="background: {priority_color}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase;">
+                                        {priority}
+                                    </span>
+                                </p>
+                                <p style="margin: 5px 0;"><strong>Submitted by:</strong> {request_data.get('submitter_name', 'Unknown')} ({request_data.get('submitter_email', 'N/A')})</p>
+                                <p style="margin: 5px 0;"><strong>Date:</strong> {request_data.get('created_at', 'N/A')}</p>
+                            </div>
+
+                            <div style="background: #e0f2fe; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                                <h3 style="color: #0277bd; margin-top: 0;">Description:</h3>
+                                <p style="margin: 0;">{request_data.get('description', 'No description provided')}</p>
+                            </div>
+
+                            {self._generate_equipment_section(request_data)}
+
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="{request_url}"
+                                   style="background: #2563eb; color: white; padding: 12px 24px;
+                                          text-decoration: none; border-radius: 6px; display: inline-block;
+                                          font-weight: bold;">
+                                    View All Maintenance Requests
+                                </a>
+                            </div>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+
+                        <div style="text-align: center; color: #6b7280; font-size: 12px;">
+                            <p>This is an automated notification from ACI Portal. Please do not reply to this email.</p>
+                            <p>&copy; 2024 ACI Portal. All rights reserved.</p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+
+            text_body = f"""
+            ACI Portal - New Maintenance Request
+
+            Title: {request_data.get('title', 'N/A')}
+            Priority: {priority.upper()}
+            Submitted by: {request_data.get('submitter_name', 'Unknown')} ({request_data.get('submitter_email', 'N/A')})
+            Date: {request_data.get('created_at', 'N/A')}
+
+            Description:
+            {request_data.get('description', 'No description provided')}
+
+            Equipment: {request_data.get('equipment_name', 'N/A')}
+            Location: {request_data.get('location', 'N/A')}
+
+            View all maintenance requests at: {request_url}
+
+            This is an automated notification from ACI Portal. Please do not reply to this email.
+
+            © 2024 ACI Portal. All rights reserved.
+            """
+
+            # Send to all superusers
+            success_count = 0
+            for email in to_emails:
+                if self._send_email(email, subject, html_body, text_body):
+                    success_count += 1
+
+            return success_count > 0
+
+        except Exception as e:
+            print(f"Error sending maintenance request notification: {e}")
+            return False
+
+    def _generate_equipment_section(self, request_data: dict) -> str:
+        """Generate HTML section for equipment details"""
+        equipment_name = request_data.get('equipment_name')
+        location = request_data.get('location')
+
+        if not equipment_name and not location:
+            return ""
+
+        html = """
+        <div style="background: #fef3c7; padding: 15px; border-radius: 6px; margin: 15px 0;">
+            <h3 style="color: #92400e; margin-top: 0;">📍 Equipment Details:</h3>
+        """
+
+        if equipment_name:
+            html += f'<p style="margin: 5px 0;"><strong>Equipment:</strong> {equipment_name}</p>'
+
+        if location:
+            html += f'<p style="margin: 5px 0;"><strong>Location:</strong> {location}</p>'
+
+        html += "</div>"
+        return html
+
     def _send_email(self, to_email: str, subject: str, html_body: str, text_body: str) -> bool:
         """Internal method to send email"""
         try:
