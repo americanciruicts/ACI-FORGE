@@ -28,7 +28,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' http://*:2003 http://*:2005 http://acidashboard.aci.local http://acidashboard.aci.local:* http://localhost:* http://localhost:8082; frame-src 'self' http://acidashboard.aci.local:* https://aci.lmhosted.com http://aci.lmhosted.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://forge.americancircuits.net https://api-forge.americancircuits.net http://*:2003 http://*:2005 http://acidashboard.aci.local http://acidashboard.aci.local:* http://localhost:* http://localhost:8082; frame-src 'self' http://acidashboard.aci.local:* https://aci.lmhosted.com http://aci.lmhosted.com;",
           },
           {
             key: 'Permissions-Policy',
@@ -61,3 +61,4 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
+

@@ -1,10 +1,7 @@
 // API URL configuration
-// Use nginx proxy (same origin) for all requests
-// This ensures requests go through nginx on port 2005, which proxies to backend
+// Uses NEXT_PUBLIC_API_URL env var, or empty string for same-origin (Vercel rewrites / nginx proxy)
 const getApiBaseUrl = () => {
-  // Empty string means same origin - requests go through nginx proxy
-  // Works whether accessing via localhost:2005 or acidashboard.aci.local:2005
-  return ''
+  return process.env.NEXT_PUBLIC_API_URL || ''
 }
 
 const API_BASE_URL = getApiBaseUrl()
