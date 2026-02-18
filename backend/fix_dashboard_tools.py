@@ -1,6 +1,6 @@
 """
 Fix dashboard tools to show the correct ones:
-- ACI Inventory
+- Kosh (Inventory Management)
 - ACI Excel Migration
 - ACI Chatbot (Ollama UI)
 - BOM Compare
@@ -32,8 +32,8 @@ def fix_dashboard_tools(db: Session):
     correct_tools = [
         {
             "name": "aci_inventory",
-            "display_name": "ACI Inventory",
-            "description": "Stock and Pick inventory management system",
+            "display_name": "Kosh",
+            "description": "Inventory management system",
             "route": "/dashboard/tools/inventory",
             "icon": "package",
             "is_active": True
@@ -47,10 +47,10 @@ def fix_dashboard_tools(db: Session):
             "is_active": True
         },
         {
-            "name": "aci_chatgpt",
-            "display_name": "ACI Chatbot",
-            "description": "AI-powered chatbot using Ollama",
-            "route": "/dashboard/tools/chatbot",
+            "name": "aci_chat",
+            "display_name": "ACI Chat",
+            "description": "AI-powered chat using OLLAMA (Local LLM)",
+            "route": "http://acidashboard.aci.local:4000/",
             "icon": "message-circle",
             "is_active": True
         },

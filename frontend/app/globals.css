@@ -139,7 +139,7 @@ html, body {
 
 /* Enhanced button styles - NO TEXT FIELD BEHAVIOR */
 .btn-primary {
-  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 shadow-lg;
+  @apply bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 shadow-lg;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -235,57 +235,57 @@ div, span, p, h1, h2, h3, h4, h5, h6, section, article, nav, header, footer {
 
 /* Form enhancements */
 .form-input {
-  @apply w-full pl-12 pr-12 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/90 backdrop-blur-sm transition-all duration-200 shadow-sm hover:shadow-md text-lg;
+  @apply w-full pl-12 pr-12 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 backdrop-blur-sm transition-all duration-200 shadow-sm hover:shadow-md text-lg;
 }
 
 .form-input-with-single-icon {
-  @apply w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/90 backdrop-blur-sm transition-all duration-200 shadow-sm hover:shadow-md text-lg;
+  @apply w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 backdrop-blur-sm transition-all duration-200 shadow-sm hover:shadow-md text-lg;
 }
 
 .form-select {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/80 backdrop-blur-sm appearance-none transition duration-200;
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/80 backdrop-blur-sm appearance-none transition duration-200;
 }
 
 /* Navigation enhancements */
 .nav-item {
-  @apply flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition duration-200 font-medium;
+  @apply flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition duration-200 font-medium;
 }
 
 .nav-item.active {
-  @apply bg-blue-100 text-blue-600 shadow-sm;
+  @apply bg-purple-100 text-purple-600 shadow-sm;
 }
 
-/* Blue-themed gradient backgrounds */
+/* Purple-themed gradient backgrounds */
 .gradient-primary {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #6b21a8 100%);
 }
 
-.gradient-blue-primary {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+.gradient-purple-primary {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
 }
 
 .gradient-secondary {
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
 }
 
-.gradient-blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+.gradient-purple {
+  background: linear-gradient(135deg, #7c3aed 0%, #6b21a8 100%);
 }
 
-.gradient-light-blue {
-  background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+.gradient-light-purple {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
 }
 
-/* Text gradients - Blue themed */
+/* Text gradients - Purple themed */
 .text-gradient {
-  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #6b21a8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .text-gradient-light {
-  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -330,11 +330,11 @@ div, span, p, h1, h2, h3, h4, h5, h6, section, article, nav, header, footer {
 }
 
 input:checked + .slider {
-  background-color: #3b82f6;
+  background-color: #7c3aed;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #3b82f6;
+  box-shadow: 0 0 1px #7c3aed;
 }
 
 input:checked + .slider:before {
@@ -347,14 +347,14 @@ input:checked + .slider:before {
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
   border-radius: 16px;
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  box-shadow: 0 10px 40px 0 rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  box-shadow: 0 10px 40px 0 rgba(124, 58, 237, 0.1);
   transition: all 0.3s ease;
 }
 
 .glass-card-enhanced:hover {
   transform: translateY(-3px);
-  box-shadow: 0 15px 50px 0 rgba(59, 130, 246, 0.15);
+  box-shadow: 0 15px 50px 0 rgba(124, 58, 237, 0.15);
 }
 
 /* App layout helpers for fixed header + sidebar */

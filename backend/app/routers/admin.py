@@ -32,7 +32,7 @@ async def get_all_users(
     user_schemas = []
     for user in users:
         user_tools = UserService.get_user_tools(user, db)
-        user_schema = UserSchema.from_orm(user)
+        user_schema = UserSchema.model_validate(user)
         user_schema.tools = user_tools
         user_schemas.append(user_schema)
     
@@ -54,7 +54,7 @@ async def get_user(
     
     # Add user tools
     user_tools = UserService.get_user_tools(user, db)
-    user_schema = UserSchema.from_orm(user)
+    user_schema = UserSchema.model_validate(user)
     user_schema.tools = user_tools
     
     return user_schema
@@ -70,7 +70,7 @@ async def create_user(
     
     # Add user tools
     user_tools = UserService.get_user_tools(user, db)
-    user_schema = UserSchema.from_orm(user)
+    user_schema = UserSchema.model_validate(user)
     user_schema.tools = user_tools
     
     return user_schema
@@ -92,7 +92,7 @@ async def update_user(
     
     # Add user tools
     user_tools = UserService.get_user_tools(user, db)
-    user_schema = UserSchema.from_orm(user)
+    user_schema = UserSchema.model_validate(user)
     user_schema.tools = user_tools
     
     return user_schema

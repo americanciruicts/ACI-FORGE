@@ -11,7 +11,7 @@ from app.core.deps import (
     require_compare_tool,
     require_aci_excel_migration,
     require_aci_inventory,
-    require_aci_chatgpt
+    require_aci_chat
 )
 from app.models.user import User
 from app.schemas.tool import Tool as ToolSchema
@@ -109,11 +109,11 @@ async def execute_aci_excel_migration(
 async def access_aci_inventory(
     current_user: User = Depends(require_aci_inventory)
 ):
-    """Access ACI Inventory Tool"""
+    """Access Kosh Tool"""
     return {
-        "message": "ACI Inventory Tool accessed successfully",
+        "message": "Kosh Tool accessed successfully",
         "user": current_user.username,
-        "tool": "ACI Inventory"
+        "tool": "Kosh"
     }
 
 @router.post("/aci-inventory/execute")
@@ -121,35 +121,37 @@ async def execute_aci_inventory(
     data: dict,
     current_user: User = Depends(require_aci_inventory)
 ):
-    """Execute ACI Inventory Tool functionality"""
+    """Execute Kosh Tool functionality"""
     return {
-        "message": "ACI Inventory Tool executed",
+        "message": "Kosh Tool executed",
         "user": current_user.username,
         "result": "Inventory operation completed",
         "data": data
     }
 
-@router.get("/aci-chatgpt/access")
-async def access_aci_chatgpt(
-    current_user: User = Depends(require_aci_chatgpt)
+@router.get("/aci-chat/access")
+async def access_aci_chat(
+    current_user: User = Depends(require_aci_chat)
 ):
-    """Access ACI ChatGPT Tool"""
+    """Access ACI Chat Tool"""
     return {
-        "message": "ACI ChatGPT Tool accessed successfully",
+        "message": "ACI Chat Tool accessed successfully",
         "user": current_user.username,
-        "tool": "ACI ChatGPT"
+        "tool": "ACI Chat",
+        "url": "http://acidashboard.aci.local:4000"
     }
 
-@router.post("/aci-chatgpt/execute")
-async def execute_aci_chatgpt(
+@router.post("/aci-chat/execute")
+async def execute_aci_chat(
     data: dict,
-    current_user: User = Depends(require_aci_chatgpt)
+    current_user: User = Depends(require_aci_chat)
 ):
-    """Execute ACI ChatGPT Tool functionality"""
+    """Execute ACI Chat Tool functionality"""
     return {
-        "message": "ACI ChatGPT Tool executed",
+        "message": "ACI Chat Tool executed",
         "user": current_user.username,
-        "result": "AI analysis completed",
+        "result": "AI chat session ready",
+        "url": "http://acidashboard.aci.local:4000",
         "data": data
     }
 

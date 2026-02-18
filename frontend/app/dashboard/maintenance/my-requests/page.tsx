@@ -25,6 +25,7 @@ export default function MyRequestsPage() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const router = useRouter()
 
   useEffect(() => {
@@ -40,7 +41,8 @@ export default function MyRequestsPage() {
   const fetchMyRequests = async () => {
     try {
       const token = localStorage.getItem('accessToken')
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/maintenance-requests/my-requests`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+      const response = await fetch(`${API_URL}/api/maintenance-requests/my-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -57,10 +59,12 @@ export default function MyRequestsPage() {
     }
   }
 
-  const filteredRequests = requests.filter(req =>
-    req.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    req.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredRequests = requests.filter(req => {
+    const matchesSearch = req.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesPriority = priorityFilter === 'all' || req.priority === priorityFilter
+    return matchesSearch && matchesPriority
+  })
 
   if (!user) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>
@@ -87,17 +91,33 @@ export default function MyRequestsPage() {
             </button>
           </div>
 
-          {/* Search */}
+          {/* Search and Filters */}
           <div className="glass-card p-6 mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search requests..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-              />
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search requests..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Priority:</label>
+                <select
+                  value={priorityFilter}
+                  onChange={(e) => setPriorityFilter(e.target.value)}
+                  className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all bg-white"
+                >
+                  <option value="all">All</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
             </div>
           </div>
 

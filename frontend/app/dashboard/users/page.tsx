@@ -121,6 +121,14 @@ export default function UserManagementPage() {
   const loadData = async () => {
     try {
       const token = localStorage.getItem('accessToken')
+
+      if (!token) {
+        console.error('No access token found')
+        clearUserSession()
+        router.push('/login')
+        return
+      }
+
       const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -128,6 +136,12 @@ export default function UserManagementPage() {
 
       // Load users
       const usersResponse = await fetch(`/api/users`, { headers })
+      if (usersResponse.status === 401) {
+        console.error('Authentication failed - redirecting to login')
+        clearUserSession()
+        router.push('/login')
+        return
+      }
       if (usersResponse.ok) {
         const usersData = await usersResponse.json()
         setUsers(usersData)
@@ -135,6 +149,12 @@ export default function UserManagementPage() {
 
       // Load roles
       const rolesResponse = await fetch(`/api/roles`, { headers })
+      if (rolesResponse.status === 401) {
+        console.error('Authentication failed - redirecting to login')
+        clearUserSession()
+        router.push('/login')
+        return
+      }
       if (rolesResponse.ok) {
         const rolesData = await rolesResponse.json()
         setRoles(rolesData)
@@ -142,6 +162,12 @@ export default function UserManagementPage() {
 
       // Load tools
       const toolsResponse = await fetch(`/api/tools`, { headers })
+      if (toolsResponse.status === 401) {
+        console.error('Authentication failed - redirecting to login')
+        clearUserSession()
+        router.push('/login')
+        return
+      }
       if (toolsResponse.ok) {
         const toolsData = await toolsResponse.json()
         setTools(toolsData)
@@ -374,31 +400,32 @@ export default function UserManagementPage() {
       <Navbar user={currentUser} />
 
       {/* Main Content */}
-      <main className="p-6 lg:p-8 bg-white min-h-screen">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+      <main className="px-4 md:px-6 py-6 md:py-8 pb-16 bg-white min-h-screen">
+          <div className="mb-6 md:mb-10">
+            <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
               <div>
-                <h2 className="text-4xl font-bold text-gray-900 mb-2">User Management</h2>
-                <p className="text-gray-600 text-lg">Manage users, roles, and permissions</p>
+                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-1 md:mb-2">User Management</h2>
+                <p className="text-gray-600 text-sm md:text-base lg:text-lg">Manage users, roles, and permissions</p>
               </div>
-              <div className="flex space-x-4">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 shadow-lg hover:shadow-xl"
+                  className="bg-gradient-to-r from-[#0066B3] to-[#0077CC] hover:from-[#004A82] hover:to-[#0066B3] text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl font-semibold text-sm md:text-base"
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-4 w-4 md:h-5 md:w-5" />
                   <span>Add User</span>
                 </button>
-                
+
                 <button
                   onClick={handleSendCredentialsToAll}
                   disabled={isSendingEmails}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm md:text-base"
                 >
-                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  <span>{isSendingEmails ? 'Sending...' : 'Email All Users'}</span>
+                  <span className="hidden sm:inline">{isSendingEmails ? 'Sending...' : 'Email All Users'}</span>
+                  <span className="sm:hidden">{isSendingEmails ? 'Sending...' : 'Email All'}</span>
                 </button>
               </div>
             </div>
@@ -417,24 +444,28 @@ export default function UserManagementPage() {
           )}
 
           {/* Search */}
-          <div className="mb-8">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <div className="mb-6 md:mb-10">
+            <div className="relative max-w-full md:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 md:h-5 md:w-5" />
               <input
                 type="text"
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                className="w-full pl-9 md:pl-10 pr-4 py-2.5 md:py-3 text-sm md:text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0066B3] focus:border-[#0066B3] shadow-sm transition-all"
               />
             </div>
           </div>
 
           {/* Users Table */}
-          <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg md:rounded-xl shadow-lg border-2 border-gray-200 overflow-hidden">
+            {/* Mobile scroll hint */}
+            <div className="lg:hidden px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-600 text-center">
+              Swipe left to see more →
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-blue-50 to-cyan-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">User Information</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Roles</th>
@@ -448,7 +479,7 @@ export default function UserManagementPage() {
                     <tr key={user.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-[#0066B3] to-[#0077CC] rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                             <UserIcon className="h-5 w-5 text-white" />
                           </div>
                           <div>
@@ -461,7 +492,7 @@ export default function UserManagementPage() {
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
                           {user.roles.map((role) => (
-                            <span key={role.id} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                            <span key={role.id} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-[#0066B3]">
                               {role.name === 'superuser' ? 'SUPER USER' : role.name.toUpperCase()}
                             </span>
                           ))}
@@ -487,12 +518,12 @@ export default function UserManagementPage() {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => openEditModal(user)}
-                            className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-all"
+                            className="text-[#0066B3] hover:text-[#004A82] p-2 rounded-lg hover:bg-blue-50 transition-all"
                             title="Edit User"
                           >
                             <Edit className="h-4 w-4" />
                           </button>
-                          
+
                           <button
                             onClick={() => handleSendCredentialsToUser(user.id)}
                             className="text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-all"
@@ -502,7 +533,7 @@ export default function UserManagementPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
                           </button>
-                          
+
                           {currentUser.id !== user.id && (
                             <button
                               onClick={() => openDeleteModal(user)}
@@ -534,9 +565,9 @@ export default function UserManagementPage() {
 
       {/* Create User Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg md:rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 md:p-8">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold text-gray-900">Create New User</h2>
                 <button
@@ -690,7 +721,7 @@ export default function UserManagementPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 font-semibold shadow-lg hover:shadow-xl"
+                    className="px-6 py-3 bg-gradient-to-r from-[#0066B3] to-[#0077CC] hover:from-[#004A82] hover:to-[#0066B3] text-white rounded-lg transition-all disabled:opacity-50 font-semibold shadow-lg hover:shadow-xl"
                   >
                     {isSubmitting ? 'Creating...' : 'Create User'}
                   </button>
@@ -703,9 +734,9 @@ export default function UserManagementPage() {
 
       {/* Edit User Modal */}
       {showEditModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg md:rounded-xl shadow-2xl max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6 md:p-8">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold text-gray-900">Edit User: {selectedUser.full_name}</h2>
                 <button
@@ -810,7 +841,7 @@ export default function UserManagementPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    className="px-6 py-3 bg-gradient-to-r from-[#0066B3] to-[#0077CC] hover:from-[#004A82] hover:to-[#0066B3] text-white rounded-lg transition-all disabled:opacity-50 font-semibold shadow-lg hover:shadow-xl"
                   >
                     {isSubmitting ? 'Updating...' : 'Update User'}
                   </button>
@@ -824,8 +855,8 @@ export default function UserManagementPage() {
       {/* Delete User Modal */}
       {showDeleteModal && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-8">
+          <div className="bg-white rounded-lg md:rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 md:p-8">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Delete User</h2>
                 <button

@@ -1,0 +1,64 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Consolidated PostgreSQL",
+      "Group": "Servers",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "Comment": "Consolidated server for all ACI applications"
+    },
+    "2": {
+      "Name": "ACI Dashboard",
+      "Group": "Applications",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "aci_dashboard",
+      "Username": "aci_dashboard_user",
+      "SSLMode": "prefer",
+      "Comment": "ACI Dashboard database"
+    },
+    "3": {
+      "Name": "Kosh Inventory",
+      "Group": "Applications",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "kosh_inventory",
+      "Username": "kosh_inventory_user",
+      "SSLMode": "prefer",
+      "Comment": "Kosh Inventory database"
+    },
+    "4": {
+      "Name": "ACI Excel Migration",
+      "Group": "Applications",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "aci_excel_migration",
+      "Username": "aci_excel_migration_user",
+      "SSLMode": "prefer",
+      "Comment": "ACI Excel Migration database"
+    },
+    "5": {
+      "Name": "BOM Compare",
+      "Group": "Applications",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "bom_compare",
+      "Username": "bom_compare_user",
+      "SSLMode": "prefer",
+      "Comment": "BOM Compare database"
+    },
+    "6": {
+      "Name": "Nexus",
+      "Group": "Applications",
+      "Host": "postgres-consolidated",
+      "Port": 5432,
+      "MaintenanceDB": "nexus",
+      "Username": "nexus_user",
+      "SSLMode": "prefer",
+      "Comment": "Nexus database"
+    }
+  }
+}

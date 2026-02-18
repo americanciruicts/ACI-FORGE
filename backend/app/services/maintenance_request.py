@@ -6,7 +6,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_, and_, desc
 from fastapi import HTTPException, status
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 from app.models.maintenance_request import MaintenanceRequest, RequestStatus
@@ -201,7 +201,7 @@ class MaintenanceRequestService:
 
         # If status is being changed to completed, record completion details
         if update_data.status == RequestStatus.COMPLETED and db_request.status != RequestStatus.COMPLETED:
-            db_request.completed_at = datetime.utcnow()
+            db_request.completed_at = datetime.now(timezone.utc)
             db_request.completed_by_id = user.id
 
         db.commit()

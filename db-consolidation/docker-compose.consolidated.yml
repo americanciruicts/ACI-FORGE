@@ -1,0 +1,130 @@
+version: '3.8'
+
+# ============================================================================
+# Consolidated PostgreSQL Server for All Applications
+# ============================================================================
+# This Docker Compose file sets up a single PostgreSQL server that hosts
+# separate databases for all five applications:
+# - ACI Dashboard
+# - Kosh Inventory
+# - ACI Excel Migration
+# - BOM Compare
+# - Nexus
+# ============================================================================
+
+services:
+  # ============================================================================
+  # ACI DATABASE - Consolidated PostgreSQL Server
+  # ============================================================================
+  aci-database:
+    image: postgres:15
+    container_name: aci-database
+    restart: always
+    ports:
+      - "5434:5432"  # Main PostgreSQL port (external:internal)
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres  # Change this in production!
+      - POSTGRES_MULTIPLE_DATABASES=aci_dashboard,kosh_inventory,aci_excel_migration,bom_compare,nexus
+    volumes:
+      # Persistent data storage
+      - postgres_consolidated_data:/var/lib/postgresql/data
+
+      # Initialization scripts
+      - ./docker-init-scripts:/docker-entrypoint-initdb.d
+
+      # PostgreSQL configuration (optional)
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aci-network
+
+  # ============================================================================
+  # PGADMIN (Optional - Database Management UI)
+  # ============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-consolidated
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@aci.local
+      - PGADMIN_DEFAULT_PASSWORD=admin123
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      aci-database:
+        condition: service_healthy
+    networks:
+      - aci-network
+
+  # ============================================================================
+  # REDIS (Shared cache/session store - optional)
+  # ============================================================================
+  redis-shared:
+    image: redis:alpine
+    container_name: redis-shared
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass "redis_secure_password"
+    volumes:
+      - redis_shared_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - aci-network
+
+volumes:
+  postgres_consolidated_data:
+    driver: local
+
+  pgadmin_data:
+    driver: local
+
+  redis_shared_data:
+    driver: local
+
+networks:
+  aci-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+
+# ============================================================================
+# USAGE INSTRUCTIONS
+# ============================================================================
+#
+# 1. Start the consolidated server:
+#    docker-compose -f docker-compose.consolidated.yml up -d
+#
+# 2. Create databases and users:
+#    docker exec -i aci-database psql -U postgres < 01-setup-databases.sql
+#
+# 3. Access PgAdmin:
+#    http://localhost:5050
+#    Email: admin@aci.local
+#    Password: admin123
+#
+# 4. Connection strings for applications:
+#    See connection-strings.env file
+#
+# 5. Stop the server:
+#    docker-compose -f docker-compose.consolidated.yml down
+#
+# 6. Backup all databases:
+#    ./04-backup-all.sh
+#
+# ============================================================================

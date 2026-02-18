@@ -79,12 +79,12 @@ export default function CompareToolPage() {
               <div className="w-10 h-10 relative">
                 <Image
                   src="/logo.jpg"
-                  alt="ACI DASHBOARD"
+                  alt="ACI FORGE"
                   fill
                   className="object-contain rounded-lg"
                 />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 hidden sm:block">ACI DASHBOARD</h1>
+              <h1 className="text-2xl font-bold text-gray-900 hidden sm:block">ACI FORGE</h1>
             </div>
           </div>
           

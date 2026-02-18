@@ -1,5 +1,13 @@
-// Use server IP for network access from all PCs
-const API_BASE_URL = 'http://192.168.1.95:2005'
+// API URL configuration
+// Use nginx proxy (same origin) for all requests
+// This ensures requests go through nginx on port 2005, which proxies to backend
+const getApiBaseUrl = () => {
+  // Empty string means same origin - requests go through nginx proxy
+  // Works whether accessing via localhost:2005 or acidashboard.aci.local:2005
+  return ''
+}
+
+const API_BASE_URL = getApiBaseUrl()
 
 // Security configuration for ACI Standards compliance
 const SECURITY_CONFIG = {
@@ -81,6 +89,7 @@ export interface User {
 
 export interface LoginResponse {
   access_token: string
+  refresh_token: string
   token_type: string
   user: User
 }
@@ -105,20 +114,35 @@ export interface UserUpdate {
 }
 
 export async function loginUser(username: string, password: string): Promise<LoginResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ username, password }),
-  })
+  // Create an AbortController for timeout
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.detail || 'Login failed')
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Login failed' }))
+      throw new Error(error.detail || 'Invalid username or password')
+    }
+
+    return response.json()
+  } catch (error: any) {
+    clearTimeout(timeoutId)
+    if (error.name === 'AbortError') {
+      throw new Error('Connection timeout. Please check if the backend server is running on localhost:2003')
+    }
+    throw new Error(error.message || 'Failed to connect to server. Please check your connection.')
   }
-
-  return response.json()
 }
 
 export async function getCurrentUser(token: string): Promise<User> {
@@ -136,7 +160,8 @@ export async function getCurrentUser(token: string): Promise<User> {
 }
 
 export async function getAllUsers(token: string): Promise<User[]> {
-  const response = await fetch(`${API_BASE_URL}/api/users`, {
+  const response = await fetch(`${API_BASE_URL}/api/users/`, {
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -318,24 +343,23 @@ export async function deleteUser(token: string, userId: number): Promise<{messag
 }
 
 export function clearUserSession(): void {
-  // Clear all localStorage items related to user session
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('user')
-  localStorage.removeItem('userSettings')
-  
-  // Clear any other potential session items
-  localStorage.removeItem('refreshToken')
-  localStorage.removeItem('lastLogin')
-  localStorage.removeItem('currentUser')
-  
-  // Clear sessionStorage completely
-  if (typeof window !== 'undefined') {
+  if (typeof window === 'undefined') return
+
+  try {
+    // Clear all localStorage items related to user session
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('user')
+    localStorage.removeItem('userSettings')
+    localStorage.removeItem('lastLogin')
+    localStorage.removeItem('currentUser')
+
+    // Clear sessionStorage completely
     sessionStorage.clear()
-    
-    // Force a small delay to ensure cleanup is complete
-    setTimeout(() => {
-      console.log('Session cleared completely')
-    }, 100)
+
+    console.log('Session cleared successfully')
+  } catch (error) {
+    console.error('Error clearing session:', error)
   }
 }
 
@@ -344,21 +368,22 @@ export function validateSession(): { isValid: boolean, user: User | null, token:
     const token = localStorage.getItem('accessToken')
     const userData = localStorage.getItem('user')
     const lastLogin = localStorage.getItem('lastLogin')
-    
+
     if (!token || !userData) {
       return { isValid: false, user: null, token: null }
     }
-    
+
     const user = JSON.parse(userData)
     const loginTime = lastLogin ? new Date(lastLogin) : null
     const now = new Date()
-    
-    // Check if session is older than 30 minutes (token expiry)
-    if (loginTime && (now.getTime() - loginTime.getTime()) > 30 * 60 * 1000) {
-      console.warn('Session may have expired')
+
+    // Check if session is older than 10 hours (token expiry)
+    if (loginTime && (now.getTime() - loginTime.getTime()) > 10 * 60 * 60 * 1000) {
+      console.warn('Session expired after 10 hours')
+      clearUserSession()
       return { isValid: false, user: null, token: null }
     }
-    
+
     return { isValid: true, user, token }
   } catch (error) {
     console.error('Session validation failed:', error)

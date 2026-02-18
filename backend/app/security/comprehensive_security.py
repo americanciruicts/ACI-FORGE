@@ -10,7 +10,7 @@ import re
 import logging
 from typing import Dict, List, Optional, Any, Set
 from functools import wraps
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import ipaddress
 from collections import defaultdict, deque
 
@@ -491,8 +491,8 @@ class SessionManager:
         session_data = {
             'user_id': user_id,
             'user_data': user_data,
-            'created_at': datetime.utcnow().isoformat(),
-            'last_activity': datetime.utcnow().isoformat(),
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'last_activity': datetime.now(timezone.utc).isoformat(),
             'ip_address': user_data.get('ip_address'),
             'user_agent': user_data.get('user_agent')
         }
@@ -508,7 +508,7 @@ class SessionManager:
             else:
                 self.active_sessions[session_id] = {
                     **session_data,
-                    'expires_at': datetime.utcnow() + timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
+                    'expires_at': datetime.now(timezone.utc) + timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
                 }
             
             # Enforce concurrent session limit
@@ -533,9 +533,9 @@ class SessionManager:
                     return data
             else:
                 session_data = self.active_sessions.get(session_id)
-                if session_data and session_data['expires_at'] > datetime.utcnow():
+                if session_data and session_data['expires_at'] > datetime.now(timezone.utc):
                     # Refresh session
-                    session_data['expires_at'] = datetime.utcnow() + timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
+                    session_data['expires_at'] = datetime.now(timezone.utc) + timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
                     return session_data
             
         except Exception as e:

@@ -49,24 +49,31 @@ def create_tools(db: Session):
         },
         {
             "name": "aci_inventory",
-            "display_name": "ACI Inventory",
+            "display_name": "Kosh",
             "description": "Inventory management system",
             "route": "/dashboard/tools/aci-inventory",
             "icon": "package"
         },
         {
-            "name": "aci_excel_migration",
-            "display_name": "ACI Excel Migration",
-            "description": "Excel migration and data processing tool",
-            "route": "/dashboard/tools/aci-excel-migration",
-            "icon": "file-spreadsheet"
+            "name": "aci_chat",
+            "display_name": "ACI Chat",
+            "description": "AI-powered chat using OLLAMA (Local LLM)",
+            "route": "/dashboard/tools/aci-chat",
+            "icon": "message-circle"
         },
         {
-            "name": "aci_chatgpt",
-            "display_name": "ACI ChatGPT",
-            "description": "AI-powered chat and analysis tool",
-            "route": "/dashboard/tools/aci-chatgpt",
-            "icon": "message-circle"
+            "name": "suitemaster",
+            "display_name": "SuiteMaster",
+            "description": "Suite management and control system",
+            "route": "/dashboard/tools/suitemaster",
+            "icon": "layout"
+        },
+        {
+            "name": "nexus",
+            "display_name": "NEXUS",
+            "description": "Traveler Management System",
+            "route": "/dashboard/tools/nexus",
+            "icon": "hexagon"
         }
     ]
     
@@ -121,7 +128,7 @@ def create_users(db: Session):
             "email": "max@americancircuits.com",
             "password": "CCiYxAAxyR0z",
             "roles": ["user"],
-            "tools": ["compare_tool", "aci_excel_migration"]
+            "tools": ["compare_tool"]
         },
         {
             "full_name": "Ket",
@@ -137,7 +144,7 @@ def create_users(db: Session):
             "email": "julia@americancircuits.com",
             "password": "SkqtODKmrLjW",
             "roles": ["user"],
-            "tools": ["aci_excel_migration"]
+            "tools": []
         },
         {
             "full_name": "Praful",
@@ -209,7 +216,7 @@ def create_users(db: Session):
             "email": "parts@americancircuits.com", 
             "password": "keKv!2WXvbzX",
             "roles": ["operator"],
-            "tools": ["aci_inventory"]
+            "tools": ["aci_inventory"]  # Kosh
         },
     ]
     

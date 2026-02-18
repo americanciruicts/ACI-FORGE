@@ -7,6 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.db.session import get_db
 from app.core.deps import (
@@ -40,6 +43,17 @@ router = APIRouter(prefix="/api/maintenance-requests", tags=["maintenance-reques
 init_upload_directory()
 
 
+def _safe_json_loads(json_str: Optional[str]) -> list:
+    """Safely parse JSON string, returning empty list on error"""
+    if not json_str:
+        return []
+    try:
+        result = json.loads(json_str)
+        return result if isinstance(result, list) else []
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return []
+
+
 @router.post("", response_model=MaintenanceRequestResponse, status_code=status.HTTP_201_CREATED)
 async def create_maintenance_request(
     request_data: MaintenanceRequestCreate,
@@ -55,26 +69,31 @@ async def create_maintenance_request(
         # Create the request
         new_request = MaintenanceRequestService.create_request(db, request_data, current_user)
 
-        # Send email notification to all superusers
-        superusers = db.query(User).join(User.roles).filter(
-            User.roles.any(name="superuser")
-        ).all()
+        # Send email notification to all superusers (non-blocking)
+        try:
+            superusers = db.query(User).join(User.roles).filter(
+                User.roles.any(name="superuser")
+            ).all()
 
-        if superusers:
-            superuser_emails = [user.email for user in superusers]
+            if superusers:
+                superuser_emails = [user.email for user in superusers]
 
-            email_data = {
-                "title": new_request.title,
-                "priority": new_request.priority.value,
-                "description": new_request.description,
-                "submitter_name": current_user.full_name,
-                "submitter_email": current_user.email,
-                "equipment_name": new_request.equipment_name,
-                "location": new_request.location,
-                "created_at": new_request.created_at.strftime("%Y-%m-%d %H:%M:%S") if new_request.created_at else "N/A"
-            }
+                email_data = {
+                    "title": new_request.title,
+                    "priority": new_request.priority.value,
+                    "description": new_request.description,
+                    "submitter_name": current_user.full_name,
+                    "submitter_email": current_user.email,
+                    "equipment_name": new_request.equipment_name,
+                    "location": new_request.location,
+                    "created_at": new_request.created_at.strftime("%Y-%m-%d %H:%M:%S") if new_request.created_at else "N/A"
+                }
 
-            email_service.send_maintenance_request_notification(superuser_emails, email_data)
+                # Try to send email but don't let it block the response
+                email_service.send_maintenance_request_notification(superuser_emails, email_data)
+        except Exception as email_error:
+            # Log email error but don't fail the request
+            logger.warning(f"Failed to send email notification: {email_error}", exc_info=True)
 
         # Format response
         response = MaintenanceRequestResponse(
@@ -91,12 +110,12 @@ async def create_maintenance_request(
             warranty_status=new_request.warranty_status,
             warranty_expiry_date=new_request.warranty_expiry_date,
             part_order_list=new_request.part_order_list,
-            attachments=json.loads(new_request.attachments) if new_request.attachments else [],
+            attachments=_safe_json_loads(new_request.attachments),
             submitter_id=new_request.submitter_id,
-            submitter_email=new_request.submitter.email,
-            submitter_name=new_request.submitter.full_name,
+            submitter_email=new_request.submitter.email if new_request.submitter else None,
+            submitter_name=new_request.submitter.full_name if new_request.submitter else None,
             created_at=new_request.created_at,
-            updated_at=new_request.updated_at,
+            updated_at=None,
             completed_at=new_request.completed_at,
             completed_by_id=new_request.completed_by_id
         )
@@ -151,12 +170,12 @@ def get_all_maintenance_requests(
             warranty_status=req.warranty_status,
             warranty_expiry_date=req.warranty_expiry_date,
             part_order_list=req.part_order_list,
-            attachments=json.loads(req.attachments) if req.attachments else [],
+            attachments=_safe_json_loads(req.attachments),
             submitter_id=req.submitter_id,
-            submitter_email=req.submitter.email,
-            submitter_name=req.submitter.full_name,
+            submitter_email=req.submitter.email if req.submitter else None,
+            submitter_name=req.submitter.full_name if req.submitter else None,
             created_at=req.created_at,
-            updated_at=req.updated_at,
+            updated_at=None,
             completed_at=req.completed_at,
             completed_by_id=req.completed_by_id,
             completed_by_name=req.completed_by.full_name if req.completed_by else None
@@ -208,12 +227,12 @@ def get_my_maintenance_requests(
             warranty_status=req.warranty_status,
             warranty_expiry_date=req.warranty_expiry_date,
             part_order_list=req.part_order_list,
-            attachments=json.loads(req.attachments) if req.attachments else [],
+            attachments=_safe_json_loads(req.attachments),
             submitter_id=req.submitter_id,
-            submitter_email=req.submitter.email,
-            submitter_name=req.submitter.full_name,
+            submitter_email=req.submitter.email if req.submitter else None,
+            submitter_name=req.submitter.full_name if req.submitter else None,
             created_at=req.created_at,
-            updated_at=req.updated_at,
+            updated_at=None,
             completed_at=req.completed_at,
             completed_by_id=req.completed_by_id,
             completed_by_name=req.completed_by.full_name if req.completed_by else None
@@ -282,12 +301,12 @@ def get_maintenance_request(
         warranty_status=request.warranty_status,
         warranty_expiry_date=request.warranty_expiry_date,
         part_order_list=request.part_order_list,
-        attachments=json.loads(request.attachments) if request.attachments else [],
+        attachments=_safe_json_loads(request.attachments),
         submitter_id=request.submitter_id,
-        submitter_email=request.submitter.email,
-        submitter_name=request.submitter.full_name,
+        submitter_email=request.submitter.email if request.submitter else None,
+        submitter_name=request.submitter.full_name if request.submitter else None,
         created_at=request.created_at,
-        updated_at=request.updated_at,
+        updated_at=None,
         completed_at=request.completed_at,
         completed_by_id=request.completed_by_id,
         completed_by_name=request.completed_by.full_name if request.completed_by else None
@@ -337,12 +356,12 @@ def update_maintenance_request(
         warranty_status=updated_request.warranty_status,
         warranty_expiry_date=updated_request.warranty_expiry_date,
         part_order_list=updated_request.part_order_list,
-        attachments=json.loads(updated_request.attachments) if updated_request.attachments else [],
+        attachments=_safe_json_loads(updated_request.attachments),
         submitter_id=updated_request.submitter_id,
-        submitter_email=updated_request.submitter.email,
-        submitter_name=updated_request.submitter.full_name,
+        submitter_email=updated_request.submitter.email if updated_request.submitter else None,
+        submitter_name=updated_request.submitter.full_name if updated_request.submitter else None,
         created_at=updated_request.created_at,
-        updated_at=updated_request.updated_at,
+        updated_at=None,
         completed_at=updated_request.completed_at,
         completed_by_id=updated_request.completed_by_id,
         completed_by_name=updated_request.completed_by.full_name if updated_request.completed_by else None
@@ -382,12 +401,12 @@ def update_request_status(
         warranty_status=updated_request.warranty_status,
         warranty_expiry_date=updated_request.warranty_expiry_date,
         part_order_list=updated_request.part_order_list,
-        attachments=json.loads(updated_request.attachments) if updated_request.attachments else [],
+        attachments=_safe_json_loads(updated_request.attachments),
         submitter_id=updated_request.submitter_id,
-        submitter_email=updated_request.submitter.email,
-        submitter_name=updated_request.submitter.full_name,
+        submitter_email=updated_request.submitter.email if updated_request.submitter else None,
+        submitter_name=updated_request.submitter.full_name if updated_request.submitter else None,
         created_at=updated_request.created_at,
-        updated_at=updated_request.updated_at,
+        updated_at=None,
         completed_at=updated_request.completed_at,
         completed_by_id=updated_request.completed_by_id,
         completed_by_name=updated_request.completed_by.full_name if updated_request.completed_by else None
@@ -463,7 +482,7 @@ async def upload_attachment(
         return {
             "message": "Files uploaded successfully",
             "filenames": filenames,
-            "total_attachments": len(json.loads(updated_request.attachments))
+            "total_attachments": len(_safe_json_loads(updated_request.attachments))
         }
 
     except Exception as e:
@@ -501,7 +520,7 @@ async def download_attachment(
         )
 
     # Verify filename is in request attachments
-    attachments = json.loads(request.attachments) if request.attachments else []
+    attachments = _safe_json_loads(request.attachments)
     if filename not in attachments:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

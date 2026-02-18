@@ -22,11 +22,11 @@ async def get_current_user_profile(
     """Get current user profile"""
     # Get user tools
     user_tools = UserService.get_user_tools(current_user, db)
-    
+
     # Create user schema with tools
-    user_schema = UserSchema.from_orm(current_user)
+    user_schema = UserSchema.model_validate(current_user)
     user_schema.tools = user_tools
-    
+
     return user_schema
 
 @router.get("/me/roles")
@@ -61,23 +61,19 @@ async def get_current_user_tools(
         ]
     }
 
-# Admin endpoints
-@router.get("/", response_model=list)
-async def get_all_users_admin(
-    current_user: User = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
-):
-    """Get all users (SuperUser only)"""
+# Shared function for getting all users
+async def _get_all_users_logic(current_user: User, db: Session):
+    """Get all users logic (SuperUser only)"""
     # Check if user is superuser
     if not any(role.name == 'superuser' for role in current_user.roles):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Access denied. SuperUser required."
         )
-    
+
     from app.services.user import UserService
     users = UserService.get_users(db)
-    
+
     # Add tools for each user
     user_list = []
     for user in users:
@@ -93,8 +89,18 @@ async def get_all_users_admin(
             "tools": [{"id": t.id, "name": t.name, "display_name": t.display_name, "description": t.description} for t in user_tools]
         }
         user_list.append(user_dict)
-    
+
     return user_list
+
+# Admin endpoints - handle both with and without trailing slash
+@router.get("/", response_model=list)
+@router.get("", response_model=list, include_in_schema=False)
+async def get_all_users_admin(
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Get all users (SuperUser only)"""
+    return await _get_all_users_logic(current_user, db)
 
 @router.post("/", response_model=dict)
 async def create_user_admin(

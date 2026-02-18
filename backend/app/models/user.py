@@ -34,3 +34,4 @@ class User(BaseModel):
     # Relationships
     roles = relationship("Role", secondary=user_roles, lazy="joined")
     tools = relationship("Tool", secondary=user_tools, lazy="joined")
+    maintenance_requests = relationship("MaintenanceRequest", back_populates="submitter", foreign_keys="[MaintenanceRequest.submitter_id]")

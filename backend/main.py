@@ -6,7 +6,7 @@ from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import JWTError, jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, EmailStr, validator
 import os
 from typing import Optional, List
@@ -190,9 +190,9 @@ def get_password_hash(password):
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -274,7 +274,7 @@ async def health_check(db: Session = Depends(get_db)):
         return {
             "status": "healthy",
             "database": "connected",
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
     except Exception as e:
         return JSONResponse(
@@ -283,7 +283,7 @@ async def health_check(db: Session = Depends(get_db)):
                 "status": "unhealthy",
                 "database": "disconnected",
                 "error": str(e),
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         )
 
@@ -351,7 +351,7 @@ async def dashboard(current_user: User = Depends(get_current_user)):
     return {
         "message": f"Welcome to the dashboard, {current_user.full_name}!",
         "user_roles": role_names,
-        "timestamp": datetime.utcnow()
+        "timestamp": datetime.now(timezone.utc)
     }
 
 # Tool access endpoints

@@ -8,7 +8,7 @@
 
 ---
 
-## All User Accounts (16 Total)
+## All User Accounts (21 Total)
 
 ### 🔥 Super User Accounts (Full Administrative Access)
 
@@ -231,7 +231,7 @@
 - **Full Name**: Larry
 - **Email**: larry@americancircuits.com
 - **Roles**: User, Manager, Operator, ITAR
-- **Permissions**: 
+- **Permissions**:
   - Standard user access
   - Manager-level oversight functions
   - Operator-level functions
@@ -239,6 +239,66 @@
   - Industry-specific capabilities
   - BOM Compare Tool access
   - Team management capabilities
+  - Enhanced system capabilities
+
+#### 18. Theresa's Account (Receiving)
+- **Username**: `receiving`
+- **Password**: `keKv!2WXvbzX`
+- **Full Name**: Theresa
+- **Email**: parts@americancircuits.com
+- **Roles**: User, Operator, ITAR
+- **Permissions**:
+  - Standard user access
+  - Operator-level functions
+  - ITAR specialized functions
+  - Industry-specific capabilities
+  - ACI ChatGPT access
+  - Kosh access
+  - Enhanced system capabilities
+
+#### 19. Bharat's Account (Shipping)
+- **Username**: `shipping`
+- **Password**: `Bharat8sp`
+- **Full Name**: Bharat
+- **Email**: shipping@americancircuits.com
+- **Roles**: User, Operator, ITAR
+- **Permissions**:
+  - Standard user access
+  - Operator-level functions
+  - ITAR specialized functions
+  - Industry-specific capabilities
+  - ACI Chat access
+  - Kosh access
+  - Enhanced system capabilities
+
+#### 20. LeeAnn's Account
+- **Username**: `leeann`
+- **Password**: `iEAiQtPuHdQA`
+- **Full Name**: LeeAnn
+- **Email**: leeann@americancircuits.com
+- **Roles**: User, Operator
+- **Permissions**:
+  - Standard user access
+  - Operator-level functions
+  - BOM Compare Tool access
+  - ACI Chat access
+  - ACI Inventory access
+  - ACI Excel Migration access
+  - Enhanced system capabilities
+
+#### 21. Bruce's Account
+- **Username**: `bruce`
+- **Password**: [PENDING - Please provide complete password]
+- **Full Name**: Bruce
+- **Email**: bruce@americancircuits.com
+- **Roles**: User, Operator
+- **Permissions**:
+  - Standard user access
+  - Operator-level functions
+  - BOM Compare Tool access
+  - ACI Chat access
+  - ACI Inventory access
+  - ACI Excel Migration access
   - Enhanced system capabilities
 
 ---
@@ -281,6 +341,10 @@
 |----------|----------|-----------|-------|-------|
 | `cathy` | `KOLCsB4kTzow` | Cathy | cathy@americancircuits.com | User, Operator, ITAR |
 | `larry` | `AaWtgE1hRECG` | Larry | larry@americancircuits.com | User, Manager, Operator, ITAR |
+| `receiving` | `keKv!2WXvbzX` | Theresa | parts@americancircuits.com | User, Operator, ITAR |
+| `shipping` | `Bharat8sp` | Bharat | shipping@americancircuits.com | User, Operator, ITAR |
+| `leeann` | `iEAiQtPuHdQA` | LeeAnn | leeann@americancircuits.com | User, Operator |
+| `bruce` | [PENDING] | Bruce | bruce@americancircuits.com | User, Operator |
 
 ---
 
@@ -335,8 +399,8 @@
 - **Access**: All users have access to this tool
 - **Functionality**: Compare and analyze BOM data with detailed reporting
 
-### ACI Inventory Tool
-- **Description**: Stock and Pick inventory management system
+### Kosh
+- **Description**: Inventory management system
 - **Internal Route**: `/dashboard/tools/inventory`
 - **External URL**: http://acidashboard.aci.local:5002/
 - **Color Scheme**: Purple theme
@@ -440,18 +504,18 @@
 
 ---
 
-**Last Updated**: August 28, 2025  
-**Version**: 2.1  
-**Total Users**: 17 accounts  
-**Super Users**: 5 accounts  
-**Manager/Users**: 5 accounts  
-**Regular User**: 1 account  
-**User/Operators**: 4 accounts  
-**User/Operator/ITAR**: 2 accounts  
+**Last Updated**: October 6, 2025
+**Version**: 2.2
+**Total Users**: 21 accounts
+**Super Users**: 5 accounts
+**Manager/Users**: 5 accounts
+**Regular User**: 1 account
+**User/Operators**: 6 accounts (includes leeann, bruce)
+**User/Operator/ITAR**: 4 accounts
 
 ### Role Distribution
 - **Super User Role**: 5 users (admin, tony, preet, kanav, khash)
 - **Manager Role**: 6 users (max, ket, julia, praful, kris, larry)
-- **User Role**: 12 users (all except super users)  
-- **Operator Role**: 7 users (kris, adam, alex, pratiksha, cathy, abhishek, larry)
-- **ITAR Role**: 2 users (cathy, larry)
+- **User Role**: 16 users (all except super users)
+- **Operator Role**: 11 users (kris, adam, alex, pratiksha, cathy, abhishek, larry, receiving, shipping, leeann, bruce)
+- **ITAR Role**: 4 users (cathy, larry, receiving, shipping)

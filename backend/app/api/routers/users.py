@@ -22,7 +22,7 @@ async def get_current_user_profile(
     user_tools = UserService.get_user_tools(current_user, db)
     
     # Create user schema with tools
-    user_schema = UserSchema.from_orm(current_user)
+    user_schema = UserSchema.model_validate(current_user)
     user_schema.tools = user_tools
     
     return user_schema

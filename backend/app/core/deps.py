@@ -68,11 +68,22 @@ def require_tool_access(tool_name: str):
 
 # Shortcut dependencies for common roles
 require_superuser = require_role("superuser")
-require_manager = require_role("manager") 
+require_manager = require_role("manager")
 require_operator = require_role("operator")
+require_maintenance = require_role("maintenance")
+
+def require_maintenance_or_superuser(current_user: User = Depends(get_current_active_user)) -> User:
+    """Require user to have either maintenance role or superuser role"""
+    has_access = any(role.name in ["superuser", "maintenance"] for role in current_user.roles)
+    if not has_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. Required role: superuser or maintenance"
+        )
+    return current_user
 
 # Tool access dependencies
 require_compare_tool = require_tool_access("compare_tool")
 require_aci_excel_migration = require_tool_access("aci_excel_migration")
 require_aci_inventory = require_tool_access("aci_inventory")
-require_aci_chatgpt = require_tool_access("aci_chatgpt")
+require_aci_chat = require_tool_access("aci_chat")

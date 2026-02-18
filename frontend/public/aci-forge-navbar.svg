@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <defs>
+    <!-- Premium blue gradient -->
+    <linearGradient id="blueGradNav" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0077CC;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0066B3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#004A82;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Forge fire gradient with animation -->
+    <linearGradient id="fireGradNav" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E65100;stop-opacity:1">
+        <animate attributeName="stop-color" values="#E65100;#FF6D00;#E65100" dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="40%" style="stop-color:#FF6D00;stop-opacity:1">
+        <animate attributeName="stop-color" values="#FF6D00;#FFAB00;#FF6D00" dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#FFAB00;stop-opacity:1">
+        <animate attributeName="stop-color" values="#FFAB00;#FFD54F;#FFAB00" dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+
+    <!-- Pulse glow for forge center -->
+    <filter id="pulseGlowNav" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="1.5;3;1.5" dur="2s" repeatCount="indefinite"/>
+      </feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Icon shadow -->
+    <filter id="iconShadowNav" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#004A82" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Circuit Globe Icon - Compact -->
+  <g transform="translate(4, 6) scale(0.52)" filter="url(#iconShadowNav)">
+    <!-- Outer ring with pulse -->
+    <path d="M45,0 C70,0 90,18 90,45 C90,72 70,90 45,90 C20,90 0,72 0,45 C0,18 20,0 45,0"
+          fill="none" stroke="url(#blueGradNav)" stroke-width="2.5" opacity="0.3">
+      <animate attributeName="opacity" values="0.2;0.5;0.2" dur="3s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- Circuit strands -->
+    <g transform="translate(5, 5)">
+      <!-- Left strand -->
+      <g fill="url(#blueGradNav)">
+        <circle cx="15" cy="8" r="3.5">
+          <animate attributeName="r" values="3.5;4;3.5" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="13" y="8" width="4" height="10" rx="2"/>
+        <circle cx="15" cy="21" r="4.5">
+          <animate attributeName="r" values="4.5;5;4.5" dur="2.2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="13" y="21" width="4" height="14" rx="2"/>
+        <circle cx="15" cy="38" r="4.5">
+          <animate attributeName="r" values="4.5;5;4.5" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="13" y="38" width="4" height="14" rx="2"/>
+        <circle cx="15" cy="55" r="4.5">
+          <animate attributeName="r" values="4.5;5;4.5" dur="2.1s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="13" y="55" width="4" height="10" rx="2"/>
+        <circle cx="15" cy="68" r="3.5">
+          <animate attributeName="r" values="3.5;4;3.5" dur="1.9s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Center-left strand -->
+      <g fill="url(#blueGradNav)">
+        <circle cx="28" cy="4" r="2.5">
+          <animate attributeName="r" values="2.5;3;2.5" dur="2.3s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="26" y="4" width="4" height="12" rx="2"/>
+        <circle cx="28" cy="19" r="4">
+          <animate attributeName="r" values="4;4.5;4" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="26" y="19" width="4" height="15" rx="2"/>
+        <circle cx="28" cy="37" r="4.5">
+          <animate attributeName="r" values="4.5;5;4.5" dur="1.7s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="26" y="37" width="4" height="15" rx="2"/>
+        <circle cx="28" cy="55" r="4">
+          <animate attributeName="r" values="4;4.5;4" dur="2.1s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="26" y="55" width="4" height="12" rx="2"/>
+        <circle cx="28" cy="70" r="2.5">
+          <animate attributeName="r" values="2.5;3;2.5" dur="1.9s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+
+      <!-- Center forge strand - ANIMATED -->
+      <g filter="url(#pulseGlowNav)">
+        <circle cx="41" cy="2" r="2" fill="url(#blueGradNav)"/>
+        <rect x="39" y="2" width="4" height="8" rx="2" fill="url(#blueGradNav)"/>
+        <circle cx="41" cy="13" r="3.5" fill="url(#fireGradNav)">
+          <animate attributeName="r" values="3.5;4.5;3.5" dur="1s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="39" y="13" width="4" height="12" rx="2" fill="url(#fireGradNav)"/>
+        <circle cx="41" cy="28" r="5.5" fill="url(#fireGradNav)">
+          <animate attributeName="r" values="5.5;7;5.5" dur="1.2s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="39" y="28" width="4" height="17" rx="2" fill="url(#fireGradNav)"/>
+        <circle cx="41" cy="48" r="5.5" fill="url(#fireGradNav)">
+          <animate attributeName="r" values="5.5;7;5.5" dur="1.1s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="39" y="48" width="4" height="12" rx="2" fill="url(#fireGradNav)"/>
+        <circle cx="41" cy="63" r="3.5" fill="url(#fireGradNav)">
+          <animate attributeName="r" values="3.5;4.5;3.5" dur="1.3s" repeatCount="indefinite"/>
+        </circle>
+        <rect x="39" y="63" width="4" height="8" rx="2" fill="url(#blueGradNav)"/>
+        <circle cx="41" cy="74" r="2" fill="url(#blueGradNav)"/>
+      </g>
+
+      <!-- Center-right strand -->
+      <g fill="#90A4AE">
+        <ellipse cx="54" cy="4" rx="2" ry="2.5">
+          <animate attributeName="ry" values="2.5;3;2.5" dur="2.2s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="52" y="4" width="4" height="12" rx="2"/>
+        <ellipse cx="54" cy="19" rx="3" ry="4">
+          <animate attributeName="ry" values="4;4.5;4" dur="2s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="52" y="19" width="4" height="15" rx="2"/>
+        <ellipse cx="54" cy="37" rx="3.5" ry="4.5">
+          <animate attributeName="ry" values="4.5;5;4.5" dur="1.8s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="52" y="37" width="4" height="15" rx="2"/>
+        <ellipse cx="54" cy="55" rx="3" ry="4">
+          <animate attributeName="ry" values="4;4.5;4" dur="2.1s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="52" y="55" width="4" height="12" rx="2"/>
+        <ellipse cx="54" cy="70" rx="2" ry="2.5">
+          <animate attributeName="ry" values="2.5;3;2.5" dur="1.9s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+
+      <!-- Right strand -->
+      <g fill="#B0BEC5">
+        <ellipse cx="66" cy="10" rx="1.5" ry="2">
+          <animate attributeName="ry" values="2;2.3;2" dur="2.3s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="64" y="10" width="4" height="10" rx="2"/>
+        <ellipse cx="66" cy="23" rx="2" ry="3">
+          <animate attributeName="ry" values="3;3.5;3" dur="2s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="64" y="23" width="4" height="12" rx="2"/>
+        <ellipse cx="66" cy="38" rx="2.5" ry="3.5">
+          <animate attributeName="ry" values="3.5;4;3.5" dur="1.7s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="64" y="38" width="4" height="12" rx="2"/>
+        <ellipse cx="66" cy="53" rx="2" ry="3">
+          <animate attributeName="ry" values="3;3.5;3" dur="2.2s" repeatCount="indefinite"/>
+        </ellipse>
+        <rect x="64" y="53" width="4" height="10" rx="2"/>
+        <ellipse cx="66" cy="66" rx="1.5" ry="2">
+          <animate attributeName="ry" values="2;2.3;2" dur="1.8s" repeatCount="indefinite"/>
+        </ellipse>
+      </g>
+    </g>
+  </g>
+
+  <!-- Brand Text - Centered vertically -->
+  <g transform="translate(58, 8)">
+    <!-- ACI FORGE text on same line -->
+    <text x="0" y="18" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF" letter-spacing="0">ACI</text>
+    <text x="42" y="18" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" letter-spacing="1">FORGE</text>
+
+    <!-- Accent line with animation -->
+    <rect x="42" y="23" width="68" height="2.5" rx="1.25" fill="url(#fireGradNav)">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- Tagline -->
+    <text x="0" y="42" font-family="'Inter', 'Segoe UI', system-ui, sans-serif" font-size="9" font-weight="500" fill="rgba(255,255,255,0.85)" letter-spacing="1.2">YOUR GATEWAY TO ENTERPRISE TOOLS</text>
+  </g>
+</svg>

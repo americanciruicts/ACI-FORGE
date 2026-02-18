@@ -84,7 +84,7 @@ def main():
         session.execute(text("""
         INSERT INTO tools (name, display_name, description, route, icon, is_active) VALUES 
         ('compare_tool', 'BOM Compare', 'Compare Bill of Materials', '/tools/compare', 'compare', true),
-        ('inventory_tool', 'ACI Inventory', 'Inventory Management', '/tools/inventory', 'package', true)
+        ('inventory_tool', 'Kosh', 'Inventory Management', '/tools/inventory', 'package', true)
         ON CONFLICT (name) DO NOTHING;
         """))
         

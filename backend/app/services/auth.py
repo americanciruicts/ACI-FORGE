@@ -9,6 +9,9 @@ from app.core.security import verify_password, create_tokens, verify_token, hash
 from app.models.user import User
 from app.schemas.auth import LoginRequest
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AuthService:
     """Authentication service"""
@@ -80,5 +83,5 @@ class AuthService:
             return True
         except Exception as e:
             db.rollback()
-            print(f"Error resetting password: {e}")
+            logger.error(f"Error resetting password: {e}", exc_info=True)
             return False

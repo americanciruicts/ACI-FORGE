@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone', // Enable standalone output for production
   images: {
     unoptimized: true, // Security: prevent image optimization vulnerabilities
   },
@@ -27,7 +28,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' http://*:2003 http://*:2005 http://localhost:8082 http://acidashboard.aci.local:8081 http://acidashboard.aci.local:5002; frame-src 'none';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' http://*:2003 http://*:2005 http://acidashboard.aci.local http://acidashboard.aci.local:* http://localhost:* http://localhost:8082; frame-src 'self' http://acidashboard.aci.local:* https://aci.lmhosted.com http://aci.lmhosted.com;",
           },
           {
             key: 'Permissions-Policy',

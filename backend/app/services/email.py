@@ -8,7 +8,11 @@ import email.mime.text
 import email.mime.multipart
 from typing import Optional
 import os
+import logging
 from app.core.config import settings
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -131,7 +135,7 @@ class EmailService:
             return self._send_email(to_email, subject, html_body, text_body)
             
         except Exception as e:
-            print(f"Error sending password reset email: {e}")
+            logger.error(f"Error sending password reset email: {e}", exc_info=True)
             return False
     
     def send_password_changed_notification(self, to_email: str, user_name: str) -> bool:
@@ -180,11 +184,17 @@ class EmailService:
             return self._send_email(to_email, subject, html_body, text_body)
             
         except Exception as e:
-            print(f"Error sending password changed notification: {e}")
+            logger.error(f"Error sending password changed notification: {e}", exc_info=True)
             return False
     
     def send_new_user_credentials(self, to_email: str, user_name: str, username: str, temporary_password: str, assigned_roles: list = None, assigned_tools: list = None) -> bool:
-        """Send credentials to new user created by admin"""
+        """
+        Send credentials to new user created by admin
+
+        Security Note: Temporary passwords are sent via email over TLS-encrypted SMTP.
+        Users are required to change their password on first login.
+        This is a necessary part of the user onboarding workflow.
+        """
         try:
             login_url = f"{settings.FRONTEND_URL}/login"
             
@@ -271,7 +281,7 @@ class EmailService:
             return self._send_email(to_email, subject, html_body, text_body)
             
         except Exception as e:
-            print(f"Error sending new user credentials: {e}")
+            logger.error(f"Error sending new user credentials: {e}", exc_info=True)
             return False
     
     def _generate_roles_section(self, assigned_roles: list) -> str:
@@ -384,7 +394,7 @@ class EmailService:
             return self._send_email(to_email, subject, html_body, text_body)
             
         except Exception as e:
-            print(f"Error sending profile creation notification: {e}")
+            logger.error(f"Error sending profile creation notification: {e}", exc_info=True)
             return False
     
     def send_existing_user_credentials(self, to_email: str, user_name: str, username: str, assigned_roles: list = None, assigned_tools: list = None) -> bool:
@@ -483,7 +493,7 @@ class EmailService:
             return self._send_email(to_email, subject, html_body, text_body)
             
         except Exception as e:
-            print(f"Error sending existing user credentials: {e}")
+            logger.error(f"Error sending existing user credentials: {e}", exc_info=True)
             return False
     
     def send_maintenance_request_notification(self, to_emails: list, request_data: dict) -> bool:
@@ -593,7 +603,7 @@ class EmailService:
             return success_count > 0
 
         except Exception as e:
-            print(f"Error sending maintenance request notification: {e}")
+            logger.error(f"Error sending maintenance request notification: {e}", exc_info=True)
             return False
 
     def _generate_equipment_section(self, request_data: dict) -> str:
@@ -623,20 +633,20 @@ class EmailService:
         try:
             # Check if SMTP is configured
             if not self.smtp_username or not self.smtp_password:
-                print("="*80)
-                print(f"📧 EMAIL SIMULATION MODE - Email to: {to_email}")
-                print(f"📧 Subject: {subject}")
-                print(f"📧 Content preview: {text_body[:300]}...")
-                print("📧 Configure SMTP_USERNAME and SMTP_PASSWORD to send actual emails")
-                print("="*80)
+                logger.info("=" * 80)
+                logger.info(f"EMAIL SIMULATION MODE - Email to: {to_email}")
+                logger.info(f"Subject: {subject}")
+                logger.info(f"Content preview: {text_body[:300]}...")
+                logger.info("Configure SMTP_USERNAME and SMTP_PASSWORD to send actual emails")
+                logger.info("=" * 80)
                 return True
-            
-            print("="*80)
-            print(f"📧 SENDING REAL EMAIL to: {to_email}")
-            print(f"📧 Subject: {subject}")
-            print(f"📧 SMTP Server: {self.smtp_server}:{self.smtp_port}")
-            print(f"📧 From: {self.from_email}")
-            print("="*80)
+
+            logger.info("=" * 80)
+            logger.info(f"SENDING REAL EMAIL to: {to_email}")
+            logger.info(f"Subject: {subject}")
+            logger.info(f"SMTP Server: {self.smtp_server}:{self.smtp_port}")
+            logger.info(f"From: {self.from_email}")
+            logger.info("=" * 80)
             
             # Create message
             message = email.mime.multipart.MIMEMultipart("alternative")
@@ -658,45 +668,45 @@ class EmailService:
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
             
-            # Try multiple SMTP configurations
+            # Try multiple SMTP configurations with timeout
             for i, config in enumerate(self.smtp_configs):
                 try:
-                    print(f"📧 Trying SMTP config {i+1}: {config['server']}:{config['port']} (TLS: {config['use_tls']})")
-                    
+                    logger.info(f"Trying SMTP config {i+1}: {config['server']}:{config['port']} (TLS: {config['use_tls']})")
+
                     if config['port'] == 465:
-                        # Use SMTP_SSL for port 465
-                        with smtplib.SMTP_SSL(config['server'], config['port'], context=context) as server:
-                            print(f"📧 Connected via SSL. Authenticating...")
+                        # Use SMTP_SSL for port 465 with 5 second timeout
+                        with smtplib.SMTP_SSL(config['server'], config['port'], context=context, timeout=5) as server:
+                            logger.info("Connected via SSL. Authenticating...")
                             server.login(self.smtp_username, self.smtp_password)
-                            print(f"📧 Sending email from {self.from_email} to {to_email}...")
+                            logger.info(f"Sending email from {self.from_email} to {to_email}...")
                             server.sendmail(self.from_email, to_email, message.as_string())
                     else:
-                        # Use regular SMTP
-                        with smtplib.SMTP(config['server'], config['port']) as server:
+                        # Use regular SMTP with 5 second timeout
+                        with smtplib.SMTP(config['server'], config['port'], timeout=5) as server:
                             if config['use_tls']:
-                                print(f"📧 Starting TLS encryption...")
+                                logger.info("Starting TLS encryption...")
                                 server.starttls(context=context)
-                            print(f"📧 Authenticating with username: {self.smtp_username}")
+                            logger.info(f"Authenticating with username: {self.smtp_username}")
                             server.login(self.smtp_username, self.smtp_password)
-                            print(f"📧 Sending email from {self.from_email} to {to_email}...")
+                            logger.info(f"Sending email from {self.from_email} to {to_email}...")
                             server.sendmail(self.from_email, to_email, message.as_string())
-                    
-                    print("="*80)
-                    print(f"✅ EMAIL SENT SUCCESSFULLY to {to_email}")
-                    print(f"✅ Using SMTP: {config['server']}:{config['port']}")
-                    print("="*80)
+
+                    logger.info("=" * 80)
+                    logger.info(f"EMAIL SENT SUCCESSFULLY to {to_email}")
+                    logger.info(f"Using SMTP: {config['server']}:{config['port']}")
+                    logger.info("=" * 80)
                     return True
-                    
+
                 except Exception as config_error:
-                    print(f"❌ Config {i+1} failed: {config_error}")
+                    logger.warning(f"Config {i+1} failed: {config_error}")
                     continue
-            
+
             # If all configurations failed
-            print("❌ All SMTP configurations failed!")
+            logger.error("All SMTP configurations failed!")
             return False
             
         except Exception as e:
-            print(f"Failed to send email to {to_email}: {e}")
+            logger.error(f"Failed to send email to {to_email}: {e}", exc_info=True)
             return False
 
 

@@ -42,6 +42,8 @@ class MaintenanceRequest(BaseModel):
     # Basic fields
     title = Column(String(255), nullable=False, index=True)
     description = Column(Text, nullable=False)
+    company = Column(String(255), nullable=False, default="American Circuits, Inc.")
+    team = Column(String(255), nullable=False, default="Internal Maintenance")
     priority = Column(Enum(PriorityLevel), default=PriorityLevel.MEDIUM, nullable=False, index=True)
     status = Column(Enum(RequestStatus), default=RequestStatus.PENDING, nullable=False, index=True)
 

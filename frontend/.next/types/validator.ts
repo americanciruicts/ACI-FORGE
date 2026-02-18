@@ -47,6 +47,36 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 }
 
 
+// Validate dashboard/dashboards/page.tsx
+{
+  const handler = {} as typeof import("dashboard/dashboards/page.js")
+  handler satisfies AppPageConfig<"/dashboard/dashboards">
+}
+
+// Validate dashboard/maintenance/all-requests/page.tsx
+{
+  const handler = {} as typeof import("dashboard/maintenance/all-requests/page.js")
+  handler satisfies AppPageConfig<"/dashboard/maintenance/all-requests">
+}
+
+// Validate dashboard/maintenance/my-requests/page.tsx
+{
+  const handler = {} as typeof import("dashboard/maintenance/my-requests/page.js")
+  handler satisfies AppPageConfig<"/dashboard/maintenance/my-requests">
+}
+
+// Validate dashboard/maintenance/requests/[id]/page.tsx
+{
+  const handler = {} as typeof import("dashboard/maintenance/requests/[id]/page.js")
+  handler satisfies AppPageConfig<"/dashboard/maintenance/requests/[id]">
+}
+
+// Validate dashboard/maintenance/submit/page.tsx
+{
+  const handler = {} as typeof import("dashboard/maintenance/submit/page.js")
+  handler satisfies AppPageConfig<"/dashboard/maintenance/submit">
+}
+
 // Validate dashboard/page.tsx
 {
   const handler = {} as typeof import("dashboard/page.js")

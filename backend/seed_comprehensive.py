@@ -84,8 +84,16 @@ def create_users(db: Session):
     sample_users = [
         # SuperUsers
         {
+            "full_name": "Administrator",
+            "username": "admin",
+            "email": "admin@americancircuits.com",
+            "password": "admin",
+            "roles": ["superuser"],
+            "tools": []
+        },
+        {
             "full_name": "Tony",
-            "username": "tony967",
+            "username": "tony",
             "email": "tony@americancircuits.com",
             "password": "AhFnrAASWN0a",
             "roles": ["superuser"],
@@ -93,7 +101,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Preet",
-            "username": "preet858",
+            "username": "preet",
             "email": "preet@americancircuits.com",
             "password": "AaWtgE1hRECG",
             "roles": ["superuser"],
@@ -101,7 +109,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Kanav",
-            "username": "kanav651",
+            "username": "kanav",
             "email": "kanav@americancircuits.com",
             "password": "XCSkRBUbQKdY",
             "roles": ["superuser"],
@@ -109,7 +117,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Khash",
-            "username": "khash826",
+            "username": "khash",
             "email": "khash@americancircuits.com",
             "password": "9OHRzT69Y3AZ",
             "roles": ["superuser"],
@@ -119,7 +127,7 @@ def create_users(db: Session):
         # Managers
         {
             "full_name": "Max",
-            "username": "max463",
+            "username": "max",
             "email": "max@americancircuits.com",
             "password": "CCiYxAAxyR0z",
             "roles": ["manager"],
@@ -127,7 +135,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Ket",
-            "username": "ket833",
+            "username": "ket",
             "email": "ket@americancircuits.com",
             "password": "jzsNCHDdFGJv",
             "roles": ["manager"],
@@ -135,7 +143,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Julia",
-            "username": "julia509",
+            "username": "julia",
             "email": "julia@americancircuits.com",
             "password": "SkqtODKmrLjW",
             "roles": ["manager"],
@@ -143,7 +151,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Praful",
-            "username": "praful396",
+            "username": "praful",
             "email": "praful@americancircuits.com",
             "password": "F1Cur8klq4pe",
             "roles": ["manager"],
@@ -153,7 +161,7 @@ def create_users(db: Session):
         # Mixed roles
         {
             "full_name": "Kris",
-            "username": "kris500",
+            "username": "kris",
             "email": "kris@americancircuits.com",
             "password": "RSoX1Qcmc3Tu",
             "roles": ["manager", "user", "operator"],
@@ -163,7 +171,7 @@ def create_users(db: Session):
         # Regular users and operators
         {
             "full_name": "Adam",
-            "username": "adam585",
+            "username": "adam",
             "email": "adam@americancircuits.com",
             "password": "5AdsYCEqrrIg",
             "roles": ["operator", "user"],
@@ -171,7 +179,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Alex",
-            "username": "alex343",
+            "username": "alex",
             "email": "alex@americancircuits.com",
             "password": "zQE3SqCV5zAE",
             "roles": ["operator", "user"],
@@ -181,7 +189,7 @@ def create_users(db: Session):
         # Specific assignments as requested
         {
             "full_name": "Pratiksha",
-            "username": "pratiksha649",
+            "username": "pratiksha",
             "email": "pratiksha@americancircuits.com",
             "password": "hUDcvxtL26I9",
             "roles": ["user", "operator"],
@@ -189,7 +197,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Cathy",
-            "username": "cathy596",
+            "username": "cathy",
             "email": "cathy@americancircuits.com",
             "password": "KOLCsB4kTzow",
             "roles": ["user", "operator"],
@@ -199,7 +207,7 @@ def create_users(db: Session):
         # Additional users
         {
             "full_name": "Bob",
-            "username": "bob771",
+            "username": "bob",
             "email": "bob@americancircuits.com",
             "password": "n6mTWAOhVDda",
             "roles": ["user"],
@@ -207,7 +215,7 @@ def create_users(db: Session):
         },
         {
             "full_name": "Abhishek",
-            "username": "abhishek878",
+            "username": "abhishek",
             "email": "abhishek@americancircuits.com",
             "password": "2umk93LcQ5cX",
             "roles": ["user", "operator"],

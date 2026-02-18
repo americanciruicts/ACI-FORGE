@@ -31,7 +31,7 @@ send_alert() {
 # Check container health
 check_containers() {
     local unhealthy_containers=()
-    local containers=("acidashboard_frontend_1" "acidashboard_backend_1" "acidashboard_nginx_1" "acidashboard_db_1" "acidashboard_redis_1")
+    local containers=("aci-dashboard_frontend_1" "aci-dashboard_backend_1" "aci-dashboard_nginx_1" "aci-dashboard_redis_1")
     
     for container in "${containers[@]}"; do
         if ! docker ps --format "table {{.Names}}\t{{.Status}}" | grep -q "$container.*Up"; then
@@ -45,7 +45,7 @@ check_containers() {
         
         # Attempt to restart the containers
         log_message "Attempting to restart failed containers..."
-        docker-compose -f /home/tony/ACI\ DASHBOARD/docker-compose.yml up -d
+        docker-compose -f /home/tony/ACI-DASHBOARD/docker-compose.yml up -d
         
         sleep 30
         

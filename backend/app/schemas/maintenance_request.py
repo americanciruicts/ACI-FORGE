@@ -11,6 +11,8 @@ class MaintenanceRequestBase(BaseModel):
     """Base schema for maintenance request"""
     title: str = Field(..., min_length=1, max_length=255, description="Title of the maintenance request")
     description: str = Field(..., min_length=1, description="Detailed description of the issue or request")
+    company: str = Field(default="American Circuits, Inc.", max_length=255, description="Company name")
+    team: str = Field(default="Internal Maintenance", max_length=255, description="Team name")
     priority: PriorityLevel = Field(default=PriorityLevel.MEDIUM, description="Priority level")
     equipment_name: Optional[str] = Field(None, max_length=255, description="Name of the equipment")
     location: Optional[str] = Field(None, max_length=255, description="Location of the equipment")
@@ -31,6 +33,8 @@ class MaintenanceRequestUpdate(BaseModel):
     """Schema for updating a maintenance request"""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = Field(None, min_length=1)
+    company: Optional[str] = Field(None, max_length=255)
+    team: Optional[str] = Field(None, max_length=255)
     priority: Optional[PriorityLevel] = None
     status: Optional[RequestStatus] = None
     equipment_name: Optional[str] = Field(None, max_length=255)

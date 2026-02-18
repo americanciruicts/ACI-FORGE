@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Search, Filter, ArrowUpDown, Eye, CheckCircle, Clock, XCircle, AlertCircle } from 'lucide-react'
+import { Shield, Search, Filter, ArrowUpDown, Eye, CheckCircle, Clock, XCircle, AlertCircle, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { User, isSuperUser, clearUserSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import StatusBadge from '@/components/maintenance/StatusBadge'
@@ -12,6 +12,8 @@ interface MaintenanceRequest {
   id: number
   title: string
   description: string
+  company: string
+  team: string
   priority: 'low' | 'medium' | 'high' | 'urgent'
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled'
   equipment_name?: string
@@ -45,6 +47,8 @@ export default function AllRequestsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'date' | 'priority'>('date')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const router = useRouter()
 
   useEffect(() => {
@@ -115,7 +119,8 @@ export default function AllRequestsPage() {
 
   const fetchAllRequests = async (token: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/maintenance-requests`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+      const response = await fetch(`${API_URL}/api/maintenance-requests`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -131,7 +136,7 @@ export default function AllRequestsPage() {
       }
 
       const data = await response.json()
-      setRequests(data)
+      setRequests(data.requests || [])
     } catch (error) {
       console.error('Error fetching requests:', error)
     } finally {
@@ -141,7 +146,8 @@ export default function AllRequestsPage() {
 
   const fetchStatistics = async (token: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/maintenance-requests/statistics`, {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+      const response = await fetch(`${API_URL}/api/maintenance-requests/statistics`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -158,6 +164,48 @@ export default function AllRequestsPage() {
 
   const handleViewRequest = (requestId: number) => {
     router.push(`/dashboard/maintenance/requests/${requestId}`)
+  }
+
+  const handleDeleteRequest = async (requestId: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+
+    if (!confirm('Are you sure you want to delete this maintenance request? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('accessToken')
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || ''
+      const response = await fetch(`${API_URL}/api/maintenance-requests/${requestId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete request')
+      }
+
+      // Refresh the requests list
+      fetchAllRequests(token!)
+      fetchStatistics(token!)
+      alert('Request deleted successfully!')
+    } catch (error) {
+      console.error('Error deleting request:', error)
+      alert('Failed to delete request. Please try again.')
+    }
+  }
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredRequests.length / pageSize)
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const paginatedRequests = filteredRequests.slice(startIndex, endIndex)
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   if (isLoading) {
@@ -312,15 +360,33 @@ export default function AllRequestsPage() {
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mb-4">
+          {/* Results Count and Page Size Selector */}
+          <div className="mb-4 flex items-center justify-between">
             <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{filteredRequests.length}</span> of{' '}
-              <span className="font-semibold">{requests.length}</span> requests
+              Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
+              <span className="font-semibold">{Math.min(endIndex, filteredRequests.length)}</span> of{' '}
+              <span className="font-semibold">{filteredRequests.length}</span> requests
             </p>
+            <div className="flex items-center space-x-2">
+              <label className="text-sm text-gray-600">Show:</label>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value))
+                  setCurrentPage(1)
+                }}
+                className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+              >
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-sm text-gray-600">per page</span>
+            </div>
           </div>
 
-          {/* Requests List */}
+          {/* Requests Cards */}
           {filteredRequests.length === 0 ? (
             <div className="glass-card p-12 text-center">
               <XCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -332,66 +398,112 @@ export default function AllRequestsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {filteredRequests.map((request) => (
-                <div
-                  key={request.id}
-                  className="glass-card p-6 hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-purple-500"
-                  onClick={() => handleViewRequest(request.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
-                        <StatusBadge status={request.status} />
-                        <PriorityBadge priority={request.priority} />
-                      </div>
-
-                      <p className="text-gray-600 mb-3 line-clamp-2">{request.description}</p>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-                        <div>
-                          <span className="font-medium text-gray-700">Submitted by:</span>
-                          <p className="text-gray-900">{request.submitter.full_name}</p>
+            <>
+              <div className="space-y-4">
+                {paginatedRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="glass-card p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-purple-500"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-xl font-semibold text-gray-900">{request.title}</h3>
+                          <StatusBadge status={request.status} />
+                          <PriorityBadge priority={request.priority} />
                         </div>
 
-                        {request.equipment_name && (
-                          <div>
-                            <span className="font-medium text-gray-700">Equipment:</span>
-                            <p className="text-gray-900">{request.equipment_name}</p>
-                          </div>
-                        )}
+                        <p className="text-gray-600 mb-3 line-clamp-2">{request.description}</p>
 
-                        {request.location && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                           <div>
-                            <span className="font-medium text-gray-700">Location:</span>
-                            <p className="text-gray-900">{request.location}</p>
+                            <span className="font-medium text-gray-700">Your Name:</span>
+                            <p className="text-gray-900">{request.submitter.full_name}</p>
                           </div>
-                        )}
 
-                        <div>
-                          <span className="font-medium text-gray-700">Submitted:</span>
-                          <p className="text-gray-900">
-                            {new Date(request.created_at).toLocaleDateString()}
-                          </p>
+                          <div>
+                            <span className="font-medium text-gray-700">Company:</span>
+                            <p className="text-gray-900">{request.company || 'American Circuits, Inc.'}</p>
+                          </div>
+
+                          <div>
+                            <span className="font-medium text-gray-700">Team:</span>
+                            <p className="text-gray-900">{request.team || 'Internal Maintenance'}</p>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="ml-4 flex flex-col space-y-2">
+                        <button
+                          onClick={() => handleViewRequest(request.id)}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
+                          <Eye className="h-4 w-4" />
+                          <span>View</span>
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteRequest(request.id, e)}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                        currentPage === 1
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          : 'bg-purple-600 text-white hover:bg-purple-700 shadow-md hover:shadow-lg'
+                      }`}
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+
+                    <div className="flex items-center space-x-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() => handlePageChange(page)}
+                          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                            currentPage === page
+                              ? 'bg-purple-600 text-white shadow-md'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
                     </div>
 
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleViewRequest(request.id)
-                      }}
-                      className="ml-4 flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                        currentPage === totalPages
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          : 'bg-purple-600 text-white hover:bg-purple-700 shadow-md hover:shadow-lg'
+                      }`}
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>View</span>
+                      <ChevronRight className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </main>
