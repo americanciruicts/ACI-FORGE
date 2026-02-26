@@ -171,7 +171,7 @@ export default function Navbar({ user }: NavbarProps) {
                     key={role.id}
                     className="text-[10px] bg-white/20 text-white/90 px-2 py-0.5 rounded-full font-medium uppercase tracking-wide"
                   >
-                    {role.name === 'superuser' ? 'Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
+                    {role.name === 'superuser' ? 'Admin' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
                   </span>
                 ))}
               </div>
@@ -205,7 +205,7 @@ export default function Navbar({ user }: NavbarProps) {
                       key={role.id}
                       className="text-xs bg-[#0066B3]/10 text-[#0066B3] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide"
                     >
-                      {role.name === 'superuser' ? 'Super User' : role.name === 'maintenance' ? 'Maintenance' : role.name}
+                      {role.name === 'superuser' ? 'Super User' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maintenance' : role.name}
                     </span>
                   ))}
                 </div>
@@ -359,7 +359,7 @@ export default function Navbar({ user }: NavbarProps) {
                   key={role.id}
                   className="text-xs bg-[#0066B3]/10 text-[#0066B3] px-2.5 py-1 rounded-full font-semibold uppercase"
                 >
-                  {role.name === 'superuser' ? 'Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
+                  {role.name === 'superuser' ? 'Admin' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
                 </span>
               ))}
             </div>
