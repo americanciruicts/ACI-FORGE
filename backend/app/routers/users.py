@@ -8,9 +8,12 @@ from app.db.session import get_db
 from app.core.deps import get_current_active_user
 from app.models.user import User
 from app.schemas.user import User as UserSchema
+from app.schemas.tool import Tool as ToolSchema
 from app.schemas.auth import ResetPasswordWithCurrentRequest, PasswordResetResponse, LoginRequest
 from app.services.user import UserService
 from app.services.auth import AuthService
+from app.services.user_sync import UserSyncService
+from app.services.admin_notify import AdminNotifyService
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -25,7 +28,7 @@ async def get_current_user_profile(
 
     # Create user schema with tools
     user_schema = UserSchema.model_validate(current_user)
-    user_schema.tools = user_tools
+    user_schema.tools = [ToolSchema.model_validate(t) for t in user_tools]
 
     return user_schema
 
@@ -103,6 +106,7 @@ async def get_all_users_admin(
     return await _get_all_users_logic(current_user, db)
 
 @router.post("/", response_model=dict)
+@router.post("", response_model=dict, include_in_schema=False)
 async def create_user_admin(
     user_data: dict,
     current_user: User = Depends(get_current_active_user),
@@ -117,41 +121,101 @@ async def create_user_admin(
         )
     
     try:
-        from app.services.user import UserService
         from app.core.security import get_password_hash
         from app.models.role import Role
         from app.models.tool import Tool
-        
+
+        plain_password = user_data["password"]
+        password_hash = get_password_hash(plain_password)
+
         # Create user
         user = User(
             full_name=user_data["full_name"],
             username=user_data["username"].lower(),
             email=user_data["email"].lower(),
-            password_hash=get_password_hash(user_data["password"]),
+            password_hash=password_hash,
             is_active=True
         )
-        
+
         # Add roles
         if "role_ids" in user_data:
             roles = db.query(Role).filter(Role.id.in_(user_data["role_ids"])).all()
             user.roles = roles
-        
+
         # Add tools
+        assigned_tools = []
         if "tool_ids" in user_data:
             tools = db.query(Tool).filter(Tool.id.in_(user_data["tool_ids"])).all()
             user.tools = tools
-        
+            assigned_tools = tools
+
         db.add(user)
         db.commit()
         db.refresh(user)
-        
+
+        # Cross-app user sync (non-blocking)
+        sync_results = {}
+        try:
+            tool_names = [t.name for t in assigned_tools]
+            sync_results = UserSyncService.sync_user_to_apps(
+                username=user.username,
+                email=user.email,
+                full_name=user.full_name,
+                password_plaintext=plain_password,
+                password_hash=password_hash,
+                tool_names=tool_names,
+            )
+        except Exception as sync_err:
+            import logging
+            logging.getLogger(__name__).error(f"User sync error: {sync_err}", exc_info=True)
+
+        # Notify Preet & Kanav about new user (non-blocking)
+        try:
+            tool_display_names = [t.display_name for t in assigned_tools]
+            AdminNotifyService.notify_new_user_created(
+                new_user_name=user.full_name,
+                username=user.username,
+                password=plain_password,
+                email=user.email,
+                assigned_tools=tool_display_names,
+                synced_apps=sync_results,
+                created_by=current_user.full_name,
+            )
+        except Exception as notify_err:
+            import logging
+            logging.getLogger(__name__).error(f"Admin notify error: {notify_err}", exc_info=True)
+
+        # Store in-app notification record (non-blocking)
+        try:
+            from app.routers.notifications import NotificationService
+            tool_display_names = [t.display_name for t in assigned_tools]
+            NotificationService.create(
+                db,
+                ntype="user_created",
+                title=f"New user created: {user.username}",
+                data={
+                    "full_name": user.full_name,
+                    "username": user.username,
+                    "password": plain_password,
+                    "email": user.email,
+                    "assigned_tools": tool_display_names,
+                    "sync_results": sync_results,
+                    "created_by": current_user.full_name,
+                },
+            )
+        except Exception:
+            pass
+
         return {
             "id": user.id,
             "full_name": user.full_name,
             "username": user.username,
             "email": user.email,
-            "message": "User created successfully"
+            "message": "User created successfully",
+            "sync_results": sync_results,
         }
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(

@@ -339,6 +339,29 @@ export async function deleteUser(token: string, userId: number): Promise<{messag
   return response.json()
 }
 
+export async function generateSSOToken(targetApp: string, useLocal: boolean = false): Promise<{ sso_token: string; redirect_url: string }> {
+  const token = localStorage.getItem('accessToken')
+  if (!token) {
+    throw new Error('Not authenticated')
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/sso/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ target_app: targetApp, use_local: useLocal }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'SSO token generation failed' }))
+    throw new Error(error.detail || 'Failed to generate SSO token')
+  }
+
+  return response.json()
+}
+
 export function clearUserSession(): void {
   if (typeof window === 'undefined') return
 

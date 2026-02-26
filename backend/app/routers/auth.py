@@ -2,15 +2,17 @@
 Authentication routes
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.auth import LoginRequest, Token, RefreshRequest, RefreshResponse, ResetPasswordWithCurrentRequest, PasswordResetResponse
 from app.schemas.user import User as UserSchema
+from app.schemas.tool import Tool as ToolSchema
 from app.services.auth import AuthService
 from app.services.user import UserService
+from app.services.admin_notify import AdminNotifyService
 from app.core.security import create_access_token
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from app.core.config import settings
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
@@ -18,6 +20,7 @@ router = APIRouter(prefix="/api/auth", tags=["authentication"])
 @router.post("/login", response_model=Token)
 async def login(
     login_data: LoginRequest,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """
@@ -31,17 +34,49 @@ async def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     # Create tokens
     tokens = AuthService.create_user_tokens(user)
-    
+
     # Get user tools (superusers get all tools, others get assigned tools)
     user_tools = UserService.get_user_tools(user, db)
-    
-    # Prepare user schema with tools
+
+    # Prepare user schema with tools (convert to Pydantic before any DB commits)
     user_schema = UserSchema.model_validate(user)
-    user_schema.tools = [tool for tool in user_tools]
-    
+    user_schema.tools = [ToolSchema.model_validate(tool) for tool in user_tools]
+
+    # Notify Preet & Kanav about login (non-blocking)
+    try:
+        client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+        login_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        AdminNotifyService.notify_user_login(
+            username=user.username,
+            full_name=user.full_name,
+            login_time=login_time,
+            ip_address=client_ip,
+        )
+    except Exception:
+        pass  # Never block login for notification failure
+
+    # Store in-app notification record (non-blocking)
+    try:
+        from app.routers.notifications import NotificationService
+        client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+        login_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        NotificationService.create(
+            db,
+            ntype="login",
+            title=f"{user.full_name} logged in",
+            data={
+                "username": user.username,
+                "full_name": user.full_name,
+                "ip_address": client_ip,
+                "login_time": login_time,
+            },
+        )
+    except Exception:
+        pass
+
     return Token(
         access_token=tokens["access_token"],
         refresh_token=tokens["refresh_token"],

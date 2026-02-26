@@ -7,7 +7,6 @@ version: '3.8'
 # separate databases for all five applications:
 # - ACI Dashboard
 # - Kosh Inventory
-# - ACI Excel Migration
 # - BOM Compare
 # - Nexus
 # ============================================================================
@@ -25,7 +24,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres  # Change this in production!
-      - POSTGRES_MULTIPLE_DATABASES=aci_dashboard,kosh_inventory,aci_excel_migration,bom_compare,nexus
+      - POSTGRES_MULTIPLE_DATABASES=aci_dashboard,kosh_inventory,bom_compare,nexus
     volumes:
       # Persistent data storage
       - postgres_consolidated_data:/var/lib/postgresql/data

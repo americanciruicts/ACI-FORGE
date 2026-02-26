@@ -160,8 +160,8 @@ export default function UserManagementPage() {
         setRoles(rolesData)
       }
 
-      // Load tools
-      const toolsResponse = await fetch(`/api/tools`, { headers })
+      // Load ALL tools (admin endpoint) for user assignment
+      const toolsResponse = await fetch(`/api/tools/admin/all`, { headers })
       if (toolsResponse.status === 401) {
         console.error('Authentication failed - redirecting to login')
         clearUserSession()

@@ -9,7 +9,8 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError, BaseModel
 from sqlalchemy.orm import Session
 from app.core.config import settings
-from app.routers import auth_router, admin_router, tools_router, users_router, maintenance_requests_router
+from app.routers import auth_router, admin_router, tools_router, users_router, maintenance_requests_router, sso_router
+from app.routers.notifications import router as notifications_router
 
 # Create FastAPI application
 # Disable OpenAPI docs in production for security
@@ -56,6 +57,8 @@ app.include_router(admin_router)
 app.include_router(tools_router)
 app.include_router(users_router)
 app.include_router(maintenance_requests_router)
+app.include_router(sso_router)
+app.include_router(notifications_router)
 
 # Root endpoint
 @app.get("/")

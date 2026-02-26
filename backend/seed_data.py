@@ -41,11 +41,11 @@ def create_tools(db: Session):
     """Create initial tools"""
     tools_data = [
         {
-            "name": "compare_tool",
-            "display_name": "BOM Compare",
-            "description": "Compare Bill of Materials",
+            "name": "bom_tool_suite",
+            "display_name": "BOM Tool Suite",
+            "description": "BOM Tool Suite for Bill of Materials management",
             "route": "/dashboard/tools/compare",
-            "icon": "compare"
+            "icon": "arrow-left-right"
         },
         {
             "name": "aci_inventory",
@@ -128,7 +128,7 @@ def create_users(db: Session):
             "email": "max@americancircuits.com",
             "password": "CCiYxAAxyR0z",
             "roles": ["user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Ket",
@@ -136,7 +136,7 @@ def create_users(db: Session):
             "email": "ket@americancircuits.com",
             "password": "jzsNCHDdFGJv",
             "roles": ["user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Julia",
@@ -152,7 +152,7 @@ def create_users(db: Session):
             "email": "praful@americancircuits.com",
             "password": "F1Cur8klq4pe",
             "roles": ["user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Kris",
@@ -160,7 +160,7 @@ def create_users(db: Session):
             "email": "kris@americancircuits.com",
             "password": "RSoX1Qcmc3Tu",
             "roles": ["user", "operator"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Adam",
@@ -168,7 +168,7 @@ def create_users(db: Session):
             "email": "adam@americancircuits.com",
             "password": "5AdsYCEqrrIg",
             "roles": ["operator", "user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Alex",
@@ -176,7 +176,7 @@ def create_users(db: Session):
             "email": "alex@americancircuits.com",
             "password": "zQE3SqCV5zAE",
             "roles": ["operator", "user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Pratiksha",
@@ -184,7 +184,7 @@ def create_users(db: Session):
             "email": "pratiksha@americancircuits.com",
             "password": "hUDcvxtL26I9",
             "roles": ["user", "operator"],
-            "tools": ["compare_tool"]  # Specific assignment as requested
+            "tools": ["bom_tool_suite"]  # Specific assignment as requested
         },
         {
             "full_name": "Cathy",
@@ -192,7 +192,7 @@ def create_users(db: Session):
             "email": "cathy@americancircuits.com",
             "password": "KOLCsB4kTzow",
             "roles": ["user", "operator"],
-            "tools": ["compare_tool"]  # Specific assignment as requested
+            "tools": ["bom_tool_suite"]  # Specific assignment as requested
         },
         {
             "full_name": "Bob",
@@ -200,7 +200,7 @@ def create_users(db: Session):
             "email": "bob@americancircuits.com",
             "password": "n6mTWAOhVDda",
             "roles": ["user"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Abhishek",
@@ -208,7 +208,7 @@ def create_users(db: Session):
             "email": "abhishek@americancircuits.com",
             "password": "2umk93LcQ5cX",
             "roles": ["user", "operator"],
-            "tools": ["compare_tool"]
+            "tools": ["bom_tool_suite"]
         },
         {
             "full_name": "Theresa",

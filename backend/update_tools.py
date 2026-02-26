@@ -63,6 +63,42 @@ def update_tools():
         else:
             print("ℹ️  NEXUS tool already exists")
 
+        # Rename compare_tool to bom_tool_suite (matches dashboard homepage)
+        compare_tool = db.query(Tool).filter(Tool.name == 'compare_tool').first()
+        if compare_tool:
+            compare_tool.name = "bom_tool_suite"
+            compare_tool.display_name = "BOM Tool Suite"
+            compare_tool.description = "BOM Tool Suite for Bill of Materials management"
+            compare_tool.icon = "arrow-left-right"
+            db.commit()
+            print("✅ compare_tool renamed to bom_tool_suite")
+        else:
+            # Check if bom_tool_suite already exists
+            bom_tool = db.query(Tool).filter(Tool.name == 'bom_tool_suite').first()
+            if not bom_tool:
+                bom_tool = Tool(
+                    name="bom_tool_suite",
+                    display_name="BOM Tool Suite",
+                    description="BOM Tool Suite for Bill of Materials management",
+                    route="/dashboard/tools/compare",
+                    icon="arrow-left-right",
+                    is_active=True
+                )
+                db.add(bom_tool)
+                db.commit()
+                print("✅ BOM Tool Suite added")
+            else:
+                print("ℹ️  bom_tool_suite already exists")
+
+        # Remove any leftover tools that aren't in the homepage 5
+        allowed = ['bom_tool_suite', 'aci_inventory', 'aci_chat', 'suitemaster', 'nexus']
+        leftover_tools = db.query(Tool).filter(~Tool.name.in_(allowed)).all()
+        for t in leftover_tools:
+            print(f"Removing leftover tool: {t.name} ({t.display_name})")
+            db.delete(t)
+        if leftover_tools:
+            db.commit()
+
         print("\n✅ Tools update completed successfully!")
 
     except Exception as e:

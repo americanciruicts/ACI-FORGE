@@ -1,41 +1,46 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, MessageCircle } from 'lucide-react'
-import { User, isSuperUser, getAllUsers, clearUserSession } from '@/lib/auth'
+import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, MessageCircle, WifiOff } from 'lucide-react'
+import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
+
+const LOCAL_FORGE_URL = 'http://acidashboard.aci.local:2005'
+const LOCAL_API_URL = 'http://acidashboard.aci.local:2003'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isOnline, setIsOnline] = useState(true)
   const [adminStats, setAdminStats] = useState<{totalUsers: number, activeUsers: number, totalTools: number} | null>(null)
   const router = useRouter()
 
+  // Safe tool name helper used everywhere
+  const safeToolName = (tool: any): string => {
+    if (!tool) return ''
+    return String(tool.name || tool.display_name || '').toLowerCase().replace(/\s+/g, '_')
+  }
+
   // Get user's assigned tools with custom ordering
   const userTools = (() => {
-    const tools = user?.tools || []
-    // Custom order: BOM Tool Suite, KOSH, Chat, SuiteMaster, then NEXUS at the end
-    const order = ['bom_tool_suite', 'aci_inventory', 'aci_chat', 'suitemaster', 'nexus']
-    return [...tools].sort((a, b) => {
-      const normalizeToolName = (name: string) => name.toLowerCase().replace(/\s+/g, '_')
-      const aName = normalizeToolName(a.name)
-      const bName = normalizeToolName(b.name)
-
-      // Map tool names to their order position
-      const getOrderIndex = (name: string) => {
-        const normalized = normalizeToolName(name)
-        if (normalized.includes('bom') || normalized === 'bom_tool_suite') return order.indexOf('bom_tool_suite')
-        if (normalized.includes('inventory') || normalized.includes('kosh')) return order.indexOf('aci_inventory')
-        if (normalized.includes('chat')) return order.indexOf('aci_chat')
-        if (normalized.includes('suitemaster') || normalized.includes('suite')) return order.indexOf('suitemaster')
-        if (normalized.includes('nexus')) return order.indexOf('nexus')
-        return 999 // Unknown tools go to the end
+    try {
+      const tools = user?.tools || []
+      if (!Array.isArray(tools) || tools.length === 0) return []
+      const getOrderIndex = (tool: any) => {
+        const n = safeToolName(tool)
+        if (n.includes('bom')) return 0
+        if (n.includes('inventory') || n.includes('kosh')) return 1
+        if (n.includes('chat')) return 2
+        if (n.includes('suitemaster') || n.includes('suite')) return 3
+        if (n.includes('nexus')) return 4
+        return 999
       }
-
-      return getOrderIndex(aName) - getOrderIndex(bName)
-    })
+      return [...tools].sort((a, b) => getOrderIndex(a) - getOrderIndex(b))
+    } catch {
+      return user?.tools || []
+    }
   })()
 
   useEffect(() => {
@@ -94,6 +99,44 @@ export default function DashboardPage() {
       console.error('Failed to fetch admin stats:', error)
     }
   }
+
+  // Detect if running on local network
+  const isLocalNetwork = typeof window !== 'undefined' && (
+    window.location.hostname.includes('192.168.') ||
+    window.location.hostname.includes('.local') ||
+    window.location.hostname === 'localhost'
+  )
+
+  // Internet connectivity detection - auto-redirect to local FORGE when offline
+  const checkConnectivity = useCallback(async () => {
+    // Skip connectivity check if already on local network
+    if (isLocalNetwork) { setIsOnline(true); return }
+    try {
+      const resp = await fetch('/health', { signal: AbortSignal.timeout(5000) })
+      setIsOnline(resp.ok)
+    } catch {
+      setIsOnline(false)
+    }
+  }, [isLocalNetwork])
+
+  useEffect(() => {
+    if (isLocalNetwork) return
+    checkConnectivity()
+    const interval = setInterval(checkConnectivity, 30000)
+    const handleOffline = () => setIsOnline(false)
+    const handleOnline = () => checkConnectivity()
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('online', handleOnline)
+    return () => { clearInterval(interval); window.removeEventListener('offline', handleOffline); window.removeEventListener('online', handleOnline) }
+  }, [isLocalNetwork, checkConnectivity])
+
+  // Show offline banner when internet is down (only affects public/Vercel users)
+  // Local network users are unaffected since they connect directly
+  useEffect(() => {
+    if (!isOnline && !isLocalNetwork) {
+      console.warn('Internet connectivity lost - API may be unavailable')
+    }
+  }, [isOnline, isLocalNetwork])
 
   const handleLogout = () => {
     clearUserSession()
@@ -199,11 +242,14 @@ export default function DashboardPage() {
               {userTools.map((tool) => {
                 // Map tool names to their respective configurations
                 const getToolConfig = (toolName: string) => {
-                  switch (toolName.toLowerCase()) {
+                  const tn = (toolName || tool.display_name || '').toLowerCase().replace(/\s+/g, '_')
+                  switch (tn) {
                     case 'bom_tool_suite':
                     case 'bom tool suite':
                       return {
-                        href: 'http://acidashboard.aci.local:8081/',
+                        href: 'https://bom-tool.vercel.app/',
+                        localHref: 'http://acidashboard.aci.local:8081/',
+                        ssoApp: null,
                         bgClass: 'bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100',
                         borderClass: 'border-orange-200 hover:border-orange-300',
                         iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600',
@@ -218,7 +264,9 @@ export default function DashboardPage() {
                     case 'aci inventory':
                     case 'inventory':
                       return {
-                        href: 'http://acidashboard.aci.local:5002/',
+                        href: 'https://aci-kosh.vercel.app/',
+                        localHref: 'http://acidashboard.aci.local:5002/',
+                        ssoApp: 'kosh',
                         bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100',
                         borderClass: 'border-purple-200 hover:border-purple-300',
                         iconBgClass: '',
@@ -233,6 +281,8 @@ export default function DashboardPage() {
                     case 'aci chat':
                       return {
                         href: 'http://acidashboard.aci.local:4000/',
+                        localHref: 'http://acidashboard.aci.local:4000/',
+                        ssoApp: null,
                         bgClass: 'bg-gradient-to-br from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100',
                         borderClass: 'border-teal-200 hover:border-teal-300',
                         iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600',
@@ -247,6 +297,8 @@ export default function DashboardPage() {
                     case 'suite master':
                       return {
                         href: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
+                        localHref: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
+                        ssoApp: null,
                         bgClass: 'bg-gradient-to-br from-blue-50 to-sky-50 hover:from-blue-100 hover:to-sky-100',
                         borderClass: 'border-blue-200 hover:border-blue-300',
                         iconBgClass: '',
@@ -259,7 +311,9 @@ export default function DashboardPage() {
                       }
                     case 'nexus':
                       return {
-                        href: 'http://acidashboard.aci.local:100',
+                        href: 'https://aci-nexus.vercel.app/',
+                        localHref: 'http://acidashboard.aci.local:100/',
+                        ssoApp: 'nexus',
                         bgClass: 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
                         borderClass: 'border-blue-200 hover:border-blue-300',
                         iconBgClass: '',
@@ -273,6 +327,8 @@ export default function DashboardPage() {
                     default:
                       return {
                         href: '#',
+                        localHref: '#',
+                        ssoApp: null,
                         bgClass: 'bg-gradient-to-br from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100',
                         borderClass: 'border-gray-200 hover:border-gray-300',
                         iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600',
@@ -289,15 +345,44 @@ export default function DashboardPage() {
                 const config = getToolConfig(tool.name)
                 const IconComponent = config.icon
 
+                const handleToolLaunch = async (e: React.MouseEvent) => {
+                  e.preventDefault()
+
+                  // SSO for both local and remote - generate token with appropriate URLs
+                  if (config.ssoApp) {
+                    try {
+                      if (isLocalNetwork) {
+                        // Local SSO: call local backend directly
+                        const token = localStorage.getItem('accessToken')
+                        if (!token) throw new Error('Not authenticated')
+                        const resp = await fetch(`${LOCAL_API_URL}/api/auth/sso/generate`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ target_app: config.ssoApp, use_local: true }),
+                        })
+                        if (!resp.ok) throw new Error('Local SSO failed')
+                        const data = await resp.json()
+                        window.open(data.redirect_url, '_blank', 'noopener,noreferrer')
+                      } else {
+                        // Remote SSO: call Vercel backend via rewrite
+                        const ssoData = await generateSSOToken(config.ssoApp)
+                        window.open(ssoData.redirect_url, '_blank', 'noopener,noreferrer')
+                      }
+                    } catch (err: any) {
+                      console.error('SSO failed, opening directly:', err.message)
+                      window.open(isLocalNetwork ? config.localHref : config.href, '_blank', 'noopener,noreferrer')
+                    }
+                  } else {
+                    // No SSO - open directly
+                    window.open(isLocalNetwork ? config.localHref : config.href, '_blank', 'noopener,noreferrer')
+                  }
+                }
+
                 return (
                   <div
                     key={tool.id}
                     className={`group ${config.bgClass} rounded-lg md:rounded-xl shadow-sm hover:shadow-lg border ${config.borderClass} p-3 md:p-4 lg:p-5 transition-all duration-300 cursor-pointer transform hover:-translate-y-1`}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      console.log('Opening tool:', config.title, 'URL:', config.href)
-                      window.open(config.href, '_blank', 'noopener,noreferrer')
-                    }}
+                    onClick={handleToolLaunch}
                   >
                     <div className="text-center">
                       <div className={`w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 mx-auto mb-2 md:mb-3 lg:mb-4 ${config.iconBgClass} rounded-lg md:rounded-xl flex items-center justify-center shadow-sm transition-all duration-300`}>

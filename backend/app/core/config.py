@@ -30,6 +30,14 @@ class Settings(BaseSettings):
     # Security
     BCRYPT_ROUNDS: int = 12
 
+    # SSO Configuration
+    SSO_SECRET_KEY: str = os.getenv("SSO_SECRET_KEY", "")
+    SSO_TOKEN_EXPIRE_SECONDS: int = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "60"))
+
+    # Cross-app database URLs (for user sync to NEXUS and KOSH)
+    NEXUS_DATABASE_URL: str = os.getenv("NEXUS_DATABASE_URL", "postgresql://nexus_user:postgres@aci-database:5432/nexus")
+    KOSH_DATABASE_URL: str = os.getenv("KOSH_DATABASE_URL", "postgresql://stockpick_user:stockpick_pass@aci-database:5432/kosh")
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 

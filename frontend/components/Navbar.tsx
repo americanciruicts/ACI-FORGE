@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X } from 'lucide-react'
+import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X, Bell } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
 
 interface NavbarProps {
@@ -32,6 +32,32 @@ export default function Navbar({ user }: NavbarProps) {
   const hasMaintenanceAccess = user.roles?.some((role: any) =>
     role.name === 'superuser' || role.name === 'maintenance'
   )
+
+  const isSuperAdmin = user.roles?.some((role: any) => role.name === 'super_admin')
+
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const fetchUnreadCount = useCallback(async () => {
+    if (!isSuperAdmin) return
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return
+      const res = await fetch('/api/notifications/unread-count', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setUnreadCount(data.count || 0)
+      }
+    } catch {}
+  }, [isSuperAdmin])
+
+  useEffect(() => {
+    fetchUnreadCount()
+    if (!isSuperAdmin) return
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [fetchUnreadCount, isSuperAdmin])
 
   return (
     <div className="w-full bg-gradient-to-r from-[#003d6a] via-[#0066B3] to-[#0077CC] shadow-xl sticky top-0 z-50">
@@ -103,7 +129,27 @@ export default function Navbar({ user }: NavbarProps) {
         </button>
 
         {/* Desktop User Profile Section */}
-        <div className="hidden lg:block relative">
+        <div className="hidden lg:flex items-center space-x-3">
+          {/* Notification Bell */}
+          {isSuperAdmin && (
+            <button
+              onClick={() => {
+                router.push('/dashboard/notifications')
+              }}
+              className="relative p-2 text-white hover:bg-white/15 rounded-xl transition-all duration-200 active:scale-95"
+              style={{ outline: 'none', userSelect: 'none' }}
+              title="Notifications"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg border-2 border-[#0066B3]">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          <div className="relative">
           <button
             onClick={() => setUserDropdownOpen(!userDropdownOpen)}
             className="flex items-center space-x-3 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 transition-all duration-200 active:scale-95"
@@ -181,6 +227,32 @@ export default function Navbar({ user }: NavbarProps) {
                   <span>View Profile</span>
                 </button>
 
+                {isSuperAdmin && (
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false)
+                      router.push('/dashboard/notifications')
+                    }}
+                    className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-all duration-200 flex items-center space-x-3"
+                    style={{ outline: 'none', userSelect: 'none' }}
+                  >
+                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center relative">
+                      <Bell className="h-4 w-4 text-gray-600" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center px-0.5">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </div>
+                    <span>Notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                )}
+
                 <button
                   onClick={() => {
                     setUserDropdownOpen(false)
@@ -213,6 +285,7 @@ export default function Navbar({ user }: NavbarProps) {
               </div>
             </div>
           )}
+          </div>
         </div>
       </div>
 
@@ -301,6 +374,23 @@ export default function Navbar({ user }: NavbarProps) {
                 <UserIcon className="h-4 w-4" />
                 <span>View Profile</span>
               </button>
+              {isSuperAdmin && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    router.push('/dashboard/notifications')
+                  }}
+                  className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-white rounded-lg transition-all"
+                >
+                  <Bell className="h-4 w-4" />
+                  <span>Notifications</span>
+                  {unreadCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              )}
               <button
                 onClick={() => {
                   setMobileMenuOpen(false)
