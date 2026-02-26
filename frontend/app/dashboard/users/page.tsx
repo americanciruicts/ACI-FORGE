@@ -504,7 +504,7 @@ export default function UserManagementPage() {
                         <div className="flex flex-wrap gap-1">
                           {user.roles.map((role) => (
                             <span key={role.id} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-[#0066B3]">
-                              {role.name === 'superuser' ? 'SUPER USER' : role.name.toUpperCase()}
+                              {role.name === 'superuser' ? 'SUPER USER' : role.name === 'super_admin' ? 'SUPER ADMIN' : role.name.toUpperCase()}
                             </span>
                           ))}
                         </div>
@@ -750,7 +750,7 @@ export default function UserManagementPage() {
                           className="mr-3 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
                         />
                         <div>
-                          <span className="text-sm font-medium text-gray-900">{role.name === 'superuser' ? 'SUPER USER' : role.name.toUpperCase()}</span>
+                          <span className="text-sm font-medium text-gray-900">{role.name === 'superuser' ? 'SUPER USER' : role.name === 'super_admin' ? 'SUPER ADMIN' : role.name.toUpperCase()}</span>
                           <p className="text-xs text-gray-500">{role.description}</p>
                         </div>
                       </label>
@@ -875,7 +875,7 @@ export default function UserManagementPage() {
                           }}
                           className="mr-2"
                         />
-                        <span className="text-sm">{role.name === 'superuser' ? 'SUPER USER' : role.name.toUpperCase()} - {role.description}</span>
+                        <span className="text-sm">{role.name === 'superuser' ? 'SUPER USER' : role.name === 'super_admin' ? 'SUPER ADMIN' : role.name.toUpperCase()} - {role.description}</span>
                       </label>
                     ))}
                   </div>
