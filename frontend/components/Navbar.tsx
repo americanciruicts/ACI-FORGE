@@ -3,8 +3,17 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X, Bell } from 'lucide-react'
+import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X, Bell, LogIn, UserPlus, ExternalLink, CheckCheck } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
+
+interface NotificationPreview {
+  id: number
+  type: string
+  title: string
+  message: Record<string, any>
+  is_read: boolean
+  created_at: string | null
+}
 
 interface NavbarProps {
   user: User
@@ -29,13 +38,12 @@ export default function Navbar({ user }: NavbarProps) {
     role.name === 'superuser'
   )
 
-  const hasMaintenanceAccess = user.roles?.some((role: any) =>
-    role.name === 'superuser' || role.name === 'maintenance'
-  )
-
   const isSuperAdmin = user.roles?.some((role: any) => role.name === 'super_admin')
 
   const [unreadCount, setUnreadCount] = useState(0)
+  const [bellDropdownOpen, setBellDropdownOpen] = useState(false)
+  const [recentNotifications, setRecentNotifications] = useState<NotificationPreview[]>([])
+  const [loadingNotifications, setLoadingNotifications] = useState(false)
 
   const fetchUnreadCount = useCallback(async () => {
     if (!isSuperAdmin) return
@@ -52,6 +60,64 @@ export default function Navbar({ user }: NavbarProps) {
     } catch {}
   }, [isSuperAdmin])
 
+  const fetchRecentNotifications = useCallback(async () => {
+    if (!isSuperAdmin) return
+    setLoadingNotifications(true)
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return
+      const res = await fetch('/api/notifications?limit=5', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setRecentNotifications(data.notifications || [])
+      }
+    } catch {} finally {
+      setLoadingNotifications(false)
+    }
+  }, [isSuperAdmin])
+
+  const getTimeAgo = (dateStr: string) => {
+    const now = new Date()
+    const date = new Date(dateStr)
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    const diffHours = Math.floor(diffMins / 60)
+    if (diffHours < 24) return `${diffHours}h ago`
+    const diffDays = Math.floor(diffHours / 24)
+    if (diffDays < 7) return `${diffDays}d ago`
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  const markAsRead = useCallback(async (id: number) => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return
+      await fetch(`/api/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      setRecentNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+      fetchUnreadCount()
+    } catch {}
+  }, [fetchUnreadCount])
+
+  const markAllAsRead = useCallback(async () => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      if (!token) return
+      await fetch('/api/notifications/mark-all-read', {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      setRecentNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+      setUnreadCount(0)
+    } catch {}
+  }, [])
+
   useEffect(() => {
     fetchUnreadCount()
     if (!isSuperAdmin) return
@@ -59,9 +125,46 @@ export default function Navbar({ user }: NavbarProps) {
     return () => clearInterval(interval)
   }, [fetchUnreadCount, isSuperAdmin])
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-dropdown]')) {
+        setBellDropdownOpen(false)
+        setUserDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
-    <div className="w-full bg-gradient-to-r from-[#003d6a] via-[#0066B3] to-[#0077CC] shadow-xl sticky top-0 z-50">
-      <div className="flex items-center justify-between h-[72px] px-4 md:px-6">
+    <div className="w-full bg-gradient-to-r from-[#003d6a] via-[#0066B3] to-[#0077CC] shadow-xl sticky top-0 z-50 relative">
+      {/* PCB Circuit Pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <svg className="absolute right-0 top-0 h-full w-[400px]" viewBox="0 0 400 72" fill="none" preserveAspectRatio="xMaxYMid slice">
+        {/* Traces - clean 90-degree routed paths */}
+        <path d="M400 18 H320 V36 H260" stroke="white" strokeWidth="1.5" opacity="0.08" />
+        <path d="M400 54 H340 V36 H300" stroke="white" strokeWidth="1.5" opacity="0.06" />
+        <path d="M260 12 V60" stroke="white" strokeWidth="1" opacity="0.05" />
+        <path d="M180 36 H220" stroke="white" strokeWidth="1" opacity="0.05" />
+        {/* Pads with annular rings */}
+        <circle cx="320" cy="18" r="5" stroke="white" strokeWidth="1" opacity="0.1" fill="none" />
+        <circle cx="320" cy="18" r="2" fill="white" opacity="0.12" />
+        <circle cx="260" cy="36" r="6" stroke="white" strokeWidth="1" opacity="0.08" fill="none" />
+        <circle cx="260" cy="36" r="2.5" fill="white" opacity="0.1" />
+        <circle cx="340" cy="54" r="4" stroke="white" strokeWidth="1" opacity="0.08" fill="none" />
+        <circle cx="340" cy="54" r="1.5" fill="white" opacity="0.1" />
+        {/* Via holes */}
+        <circle cx="300" cy="36" r="3" stroke="white" strokeWidth="0.8" opacity="0.07" fill="none" />
+        <circle cx="300" cy="36" r="1" fill="white" opacity="0.08" />
+        <circle cx="220" cy="36" r="2.5" stroke="white" strokeWidth="0.8" opacity="0.06" fill="none" />
+        <circle cx="220" cy="36" r="0.8" fill="white" opacity="0.07" />
+        <circle cx="180" cy="36" r="2" stroke="white" strokeWidth="0.8" opacity="0.05" fill="none" />
+      </svg>
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between h-[72px] px-4 md:px-6">
         {/* Logo and Brand */}
         <div className="flex items-center flex-shrink-0">
           <Image
@@ -89,7 +192,6 @@ export default function Navbar({ user }: NavbarProps) {
             <span>Home</span>
           </button>
 
-          {/* Maintenance Button */}
           <button
             onClick={() => router.push('/dashboard/maintenance/submit')}
             className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 ${
@@ -130,28 +232,133 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* Desktop User Profile Section */}
         <div className="hidden lg:flex items-center space-x-3">
-          {/* Notification Bell */}
+          {/* Notification Bell with Dropdown */}
           {isSuperAdmin && (
-            <button
-              onClick={() => {
-                router.push('/dashboard/notifications')
-              }}
-              className="relative p-2 text-white hover:bg-white/15 rounded-xl transition-all duration-200 active:scale-95"
-              style={{ outline: 'none', userSelect: 'none' }}
-              title="Notifications"
-            >
-              <Bell className="h-5 w-5" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg border-2 border-[#0066B3]">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
+            <div className="relative" data-dropdown>
+              <button
+                onClick={() => {
+                  const opening = !bellDropdownOpen
+                  setBellDropdownOpen(opening)
+                  if (opening) {
+                    setUserDropdownOpen(false)
+                    fetchRecentNotifications()
+                  }
+                }}
+                className="relative p-2 text-white hover:bg-white/15 rounded-xl transition-all duration-200 active:scale-95"
+                style={{ outline: 'none', userSelect: 'none' }}
+                title="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 shadow-lg border-2 border-[#0066B3]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Bell Dropdown */}
+              {bellDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                  {/* Header */}
+                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50">
+                    <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        markAllAsRead()
+                      }}
+                      className="text-xs text-[#0066B3] hover:text-[#004A82] font-semibold flex items-center gap-1 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors"
+                      style={{ outline: 'none' }}
+                    >
+                      <CheckCheck className="h-3.5 w-3.5" />
+                      <span>Mark all read</span>
+                    </button>
+                  </div>
+
+                  {/* Notification List */}
+                  <div className="max-h-[320px] overflow-y-auto">
+                    {loadingNotifications ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0066B3]"></div>
+                      </div>
+                    ) : recentNotifications.length === 0 ? (
+                      <div className="py-8 text-center">
+                        <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-sm text-gray-400">No notifications</p>
+                      </div>
+                    ) : (
+                      recentNotifications.map((notif) => {
+                        const getIcon = () => {
+                          if (notif.type === 'login' || notif.type === 'sso_login' || notif.type === 'nexus_login') return <LogIn className="h-4 w-4" />
+                          if (notif.type === 'user_created') return <UserPlus className="h-4 w-4" />
+                          return <Bell className="h-4 w-4" />
+                        }
+                        const getIconColor = () => {
+                          if (notif.type === 'login') return 'bg-blue-100 text-blue-600'
+                          if (notif.type === 'sso_login' || notif.type === 'nexus_login') return 'bg-indigo-100 text-indigo-600'
+                          if (notif.type === 'user_created') return 'bg-green-100 text-green-600'
+                          return 'bg-gray-100 text-gray-600'
+                        }
+                        const msg = notif.message || {}
+                        const subtitle = msg.username || msg.full_name || msg.email || ''
+                        const timeAgo = notif.created_at ? getTimeAgo(notif.created_at) : ''
+
+                        return (
+                          <div
+                            key={notif.id}
+                            className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${
+                              !notif.is_read ? 'bg-blue-50/50' : ''
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${getIconColor()}`}>
+                              {getIcon()}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-xs truncate ${!notif.is_read ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
+                                {notif.title}
+                              </p>
+                              {subtitle && (
+                                <p className="text-xs text-gray-500 truncate mt-0.5">{subtitle}</p>
+                              )}
+                              {timeAgo && (
+                                <p className="text-[10px] text-gray-400 mt-1">{timeAgo}</p>
+                              )}
+                            </div>
+                            {!notif.is_read && (
+                              <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+                            )}
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+
+                  {/* Footer - View All */}
+                  <div className="border-t border-gray-100">
+                    <button
+                      onClick={() => {
+                        setBellDropdownOpen(false)
+                        router.push('/dashboard/notifications')
+                      }}
+                      className="w-full px-4 py-3 text-sm font-semibold text-[#0066B3] hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                      style={{ outline: 'none' }}
+                    >
+                      <span>View all notifications</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
               )}
-            </button>
+            </div>
           )}
 
-          <div className="relative">
+          <div className="relative" data-dropdown>
           <button
-            onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+            onClick={() => {
+              const opening = !userDropdownOpen
+              setUserDropdownOpen(opening)
+              if (opening) setBellDropdownOpen(false)
+            }}
             className="flex items-center space-x-3 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 transition-all duration-200 active:scale-95"
             style={{ outline: 'none', userSelect: 'none' }}
           >
@@ -291,7 +498,7 @@ export default function Navbar({ user }: NavbarProps) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg">
+        <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg relative z-10">
           {/* Navigation Links */}
           <div className="px-4 py-3 space-y-1">
             <button
@@ -321,7 +528,7 @@ export default function Navbar({ user }: NavbarProps) {
               }`}
             >
               <Wrench className="h-5 w-5" />
-              <span>Submit Maintenance Request</span>
+              <span>Maintenance</span>
             </button>
 
             {hasUserManagementAccess && (

@@ -135,7 +135,8 @@
       "Bash(PGPASSWORD=postgres psql -h localhost -p 5001 -U nexus_user -d nexus -c \"SELECT id, username, email, first_name FROM users WHERE first_name ILIKE ''%bharat%'' OR first_name ILIKE ''%theresa%'' ORDER BY id;\")",
       "Bash(PGPASSWORD=stockpick_pass psql -h localhost -p 5001 -U stockpick_user -d kosh -c \"SELECT id, userlogin, username FROM pcb_inventory.\"\"tblUser\"\" WHERE username ILIKE ''%theresa%'' OR username ILIKE ''%bharat%'' ORDER BY id;\")",
       "Bash(while read f)",
-      "Bash(do grep -l \"charAt.*toUpperCase\\\\|split.*@.*charAt\" \"$f\")"
+      "Bash(do grep -l \"charAt.*toUpperCase\\\\|split.*@.*charAt\" \"$f\")",
+      "Bash(docker port aci-forge-frontend-1)"
     ],
     "deny": [],
     "ask": [],

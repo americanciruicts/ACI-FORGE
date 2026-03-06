@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://attend-highlighted-proportion-annotation.trycloudflare.com/api/:path*"
+      "destination": "https://scan-truth-airfare-bug.trycloudflare.com/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://attend-highlighted-proportion-annotation.trycloudflare.com/health"
+      "destination": "https://scan-truth-airfare-bug.trycloudflare.com/health"
     }
   ]
 }

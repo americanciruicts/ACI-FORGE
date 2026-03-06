@@ -393,6 +393,21 @@ export default function UserManagementPage() {
     setCurrentPage(1)
   }, [searchTerm])
 
+  // Auto-dismiss success/error messages after 5 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 5000)
+      return () => clearTimeout(timer)
+    }
+  }, [success])
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 8000)
+      return () => clearTimeout(timer)
+    }
+  }, [error])
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -729,6 +744,39 @@ export default function UserManagementPage() {
                         </button>
                       </div>
                     </div>
+                    {/* Password Strength Indicator */}
+                    {createForm.password && (
+                      <div className="mt-2">
+                        <div className="flex gap-1 mb-1">
+                          {[...Array(4)].map((_, i) => {
+                            const pwd = createForm.password
+                            const strength = [
+                              pwd.length >= 8,
+                              /[A-Z]/.test(pwd) && /[a-z]/.test(pwd),
+                              /\d/.test(pwd),
+                              /[!@#$%^&*]/.test(pwd)
+                            ].filter(Boolean).length
+                            return (
+                              <div
+                                key={i}
+                                className={`h-1.5 flex-1 rounded-full transition-all ${
+                                  i < strength
+                                    ? strength <= 1 ? 'bg-red-400' : strength <= 2 ? 'bg-yellow-400' : strength <= 3 ? 'bg-blue-400' : 'bg-green-500'
+                                    : 'bg-gray-200'
+                                }`}
+                              />
+                            )
+                          })}
+                        </div>
+                        <p className="text-[10px] text-gray-400">
+                          {(() => {
+                            const pwd = createForm.password
+                            const s = [pwd.length >= 8, /[A-Z]/.test(pwd) && /[a-z]/.test(pwd), /\d/.test(pwd), /[!@#$%^&*]/.test(pwd)].filter(Boolean).length
+                            return s <= 1 ? 'Weak' : s <= 2 ? 'Fair' : s <= 3 ? 'Good' : 'Strong'
+                          })()}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

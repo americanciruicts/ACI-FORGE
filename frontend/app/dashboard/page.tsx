@@ -163,13 +163,52 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="px-4 md:px-6 py-6 md:py-8 pb-16 bg-white min-h-screen">
-          <div className="mb-8 md:mb-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-              Welcome to ACI FORGE, {user.full_name}!
-            </h2>
-            <p className="text-gray-600 text-base md:text-lg">
-              Your gateway to enterprise tools
-            </p>
+          {/* Welcome Banner with PCB Circuit Pattern */}
+          <div className="mb-8 md:mb-10 bg-gradient-to-br from-[#003d6a] via-[#0066B3] to-[#0077CC] text-white rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
+            {/* PCB Circuit Pattern */}
+            <svg className="absolute right-0 top-0 h-full w-full pointer-events-none" viewBox="0 0 800 160" fill="none" preserveAspectRatio="xMaxYMid slice">
+              {/* Main routed traces */}
+              <path d="M800 30 H680 V70 H600 V110 H540" stroke="white" strokeWidth="1.5" opacity="0.07" />
+              <path d="M800 130 H720 V90 H640" stroke="white" strokeWidth="1.5" opacity="0.06" />
+              <path d="M660 20 V140" stroke="white" strokeWidth="1" opacity="0.04" />
+              <path d="M560 50 H620 V70" stroke="white" strokeWidth="1" opacity="0.05" />
+              <path d="M480 80 H530" stroke="white" strokeWidth="1" opacity="0.04" />
+              {/* IC chip outline */}
+              <rect x="670" y="55" width="40" height="30" rx="3" stroke="white" strokeWidth="1.2" opacity="0.06" fill="none" />
+              <line x1="670" y1="65" x2="662" y2="65" stroke="white" strokeWidth="1" opacity="0.05" />
+              <line x1="670" y1="75" x2="662" y2="75" stroke="white" strokeWidth="1" opacity="0.05" />
+              <line x1="710" y1="65" x2="718" y2="65" stroke="white" strokeWidth="1" opacity="0.05" />
+              <line x1="710" y1="75" x2="718" y2="75" stroke="white" strokeWidth="1" opacity="0.05" />
+              {/* Pads with annular rings */}
+              <circle cx="680" cy="30" r="6" stroke="white" strokeWidth="1.2" opacity="0.08" fill="none" />
+              <circle cx="680" cy="30" r="2.5" fill="white" opacity="0.1" />
+              <circle cx="600" cy="110" r="7" stroke="white" strokeWidth="1.2" opacity="0.07" fill="none" />
+              <circle cx="600" cy="110" r="3" fill="white" opacity="0.09" />
+              <circle cx="720" cy="130" r="5" stroke="white" strokeWidth="1" opacity="0.07" fill="none" />
+              <circle cx="720" cy="130" r="2" fill="white" opacity="0.08" />
+              <circle cx="540" cy="110" r="5" stroke="white" strokeWidth="1" opacity="0.06" fill="none" />
+              <circle cx="540" cy="110" r="2" fill="white" opacity="0.07" />
+              {/* Via holes */}
+              <circle cx="640" cy="70" r="3.5" stroke="white" strokeWidth="0.8" opacity="0.06" fill="none" />
+              <circle cx="640" cy="70" r="1.2" fill="white" opacity="0.07" />
+              <circle cx="620" cy="90" r="3" stroke="white" strokeWidth="0.8" opacity="0.05" fill="none" />
+              <circle cx="620" cy="90" r="1" fill="white" opacity="0.06" />
+              <circle cx="530" cy="80" r="2.5" stroke="white" strokeWidth="0.8" opacity="0.05" fill="none" />
+              <circle cx="530" cy="80" r="0.8" fill="white" opacity="0.06" />
+              <circle cx="480" cy="80" r="2" stroke="white" strokeWidth="0.8" opacity="0.04" fill="none" />
+              {/* Scattered small vias for depth */}
+              <circle cx="750" cy="50" r="1.5" fill="white" opacity="0.05" />
+              <circle cx="580" cy="40" r="1.5" fill="white" opacity="0.04" />
+              <circle cx="500" cy="120" r="1.5" fill="white" opacity="0.04" />
+            </svg>
+            <div className="relative z-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+                Welcome to ACI FORGE, {user.full_name}!
+              </h2>
+              <p className="text-white/80 text-base md:text-lg">
+                Your gateway to enterprise tools
+              </p>
+            </div>
           </div>
 
           {/* Admin Summary for Super Users */}

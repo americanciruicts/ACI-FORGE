@@ -46,19 +46,39 @@ export default function LoginPage() {
       <div className="background-animation">
         <div className="gradient-orb orb-1"></div>
         <div className="gradient-orb orb-2"></div>
-        <div className="gradient-orb orb-3"></div>
-        <div className="gradient-orb orb-4"></div>
       </div>
 
-      {/* Circuit pattern overlay */}
-      <div className="circuit-pattern"></div>
-
-      {/* Grid overlay for depth */}
+      {/* Circuit grid overlay for depth */}
       <div className="grid-overlay"></div>
+
+      {/* PCB circuit decoration */}
+      <svg className="circuit-decoration" viewBox="0 0 500 500" fill="none">
+        {/* Trace paths */}
+        <path d="M0 120 H150 V200 H250" stroke="rgba(0,136,204,0.06)" strokeWidth="1.5" />
+        <path d="M500 80 H380 V160 H300" stroke="rgba(0,136,204,0.05)" strokeWidth="1.5" />
+        <path d="M200 0 V100 H280 V180" stroke="rgba(0,136,204,0.04)" strokeWidth="1" />
+        <path d="M0 380 H120 V320 H200" stroke="rgba(0,136,204,0.05)" strokeWidth="1.5" />
+        <path d="M500 420 H400 V350 H320" stroke="rgba(0,136,204,0.04)" strokeWidth="1.5" />
+        <path d="M350 500 V430 H280" stroke="rgba(0,136,204,0.04)" strokeWidth="1" />
+        {/* Pads */}
+        <circle cx="150" cy="120" r="5" stroke="rgba(0,136,204,0.07)" strokeWidth="1" fill="none" />
+        <circle cx="150" cy="120" r="2" fill="rgba(0,136,204,0.08)" />
+        <circle cx="380" cy="80" r="5" stroke="rgba(0,136,204,0.06)" strokeWidth="1" fill="none" />
+        <circle cx="380" cy="80" r="2" fill="rgba(0,136,204,0.07)" />
+        <circle cx="120" cy="380" r="5" stroke="rgba(0,136,204,0.06)" strokeWidth="1" fill="none" />
+        <circle cx="120" cy="380" r="2" fill="rgba(0,136,204,0.07)" />
+        <circle cx="400" cy="420" r="4" stroke="rgba(0,136,204,0.05)" strokeWidth="1" fill="none" />
+        <circle cx="400" cy="420" r="1.5" fill="rgba(0,136,204,0.06)" />
+        {/* Vias */}
+        <circle cx="250" cy="200" r="3" stroke="rgba(0,136,204,0.05)" strokeWidth="0.8" fill="none" />
+        <circle cx="300" cy="160" r="3" stroke="rgba(0,136,204,0.05)" strokeWidth="0.8" fill="none" />
+        <circle cx="200" cy="320" r="3" stroke="rgba(0,136,204,0.04)" strokeWidth="0.8" fill="none" />
+        <circle cx="320" cy="350" r="3" stroke="rgba(0,136,204,0.04)" strokeWidth="0.8" fill="none" />
+      </svg>
 
       {/* Floating particles */}
       <div className="particles">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div key={i} className={`particle particle-${i + 1}`}></div>
         ))}
       </div>
@@ -214,24 +234,6 @@ export default function LoginPage() {
           animation-delay: -6s;
         }
 
-        .orb-3 {
-          width: 500px;
-          height: 500px;
-          background: radial-gradient(circle, rgba(0, 136, 204, 0.25) 0%, transparent 70%);
-          top: 50%;
-          right: 10%;
-          animation-delay: -12s;
-        }
-
-        .orb-4 {
-          width: 450px;
-          height: 450px;
-          background: radial-gradient(circle, rgba(255, 109, 0, 0.2) 0%, transparent 70%);
-          bottom: 40%;
-          left: 5%;
-          animation-delay: -18s;
-        }
-
         @keyframes float {
           0%, 100% {
             transform: translate(0, 0) scale(1);
@@ -247,26 +249,14 @@ export default function LoginPage() {
           }
         }
 
-        /* Circuit pattern */
-        .circuit-pattern {
+        /* Circuit decoration SVG */
+        .circuit-decoration {
           position: absolute;
           inset: 0;
-          background-image:
-            radial-gradient(circle at 20% 30%, rgba(0, 102, 179, 0.12) 2px, transparent 2px),
-            radial-gradient(circle at 80% 70%, rgba(230, 81, 0, 0.08) 2px, transparent 2px),
-            radial-gradient(circle at 50% 50%, rgba(0, 136, 204, 0.06) 1.5px, transparent 1.5px);
-          background-size: 80px 80px, 100px 100px, 50px 50px;
-          animation: circuitMove 40s linear infinite;
+          width: 100%;
+          height: 100%;
           z-index: 1;
-        }
-
-        @keyframes circuitMove {
-          0% {
-            background-position: 0 0, 50px 50px, 25px 25px;
-          }
-          100% {
-            background-position: 80px 80px, 150px 150px, 75px 75px;
-          }
+          pointer-events: none;
         }
 
         /* Grid overlay */
@@ -302,25 +292,13 @@ export default function LoginPage() {
         }
 
         .particle-1 { left: 10%; top: 20%; animation-delay: 0s; }
-        .particle-2 { left: 20%; top: 80%; animation-delay: -2s; }
-        .particle-3 { left: 30%; top: 40%; animation-delay: -4s; }
-        .particle-4 { left: 40%; top: 60%; animation-delay: -6s; }
-        .particle-5 { left: 50%; top: 30%; animation-delay: -8s; }
-        .particle-6 { left: 60%; top: 70%; animation-delay: -10s; }
-        .particle-7 { left: 70%; top: 50%; animation-delay: -12s; }
-        .particle-8 { left: 80%; top: 25%; animation-delay: -1s; }
-        .particle-9 { left: 90%; top: 85%; animation-delay: -3s; }
-        .particle-10 { left: 15%; top: 55%; animation-delay: -5s; }
-        .particle-11 { left: 25%; top: 15%; animation-delay: -7s; }
-        .particle-12 { left: 35%; top: 75%; animation-delay: -9s; }
-        .particle-13 { left: 45%; top: 45%; animation-delay: -11s; }
-        .particle-14 { left: 55%; top: 90%; animation-delay: -13s; }
-        .particle-15 { left: 65%; top: 35%; animation-delay: -2.5s; }
-        .particle-16 { left: 75%; top: 65%; animation-delay: -4.5s; }
-        .particle-17 { left: 85%; top: 10%; animation-delay: -6.5s; }
-        .particle-18 { left: 95%; top: 55%; animation-delay: -8.5s; }
-        .particle-19 { left: 5%; top: 70%; animation-delay: -10.5s; }
-        .particle-20 { left: 50%; top: 5%; animation-delay: -12.5s; }
+        .particle-2 { left: 25%; top: 75%; animation-delay: -2s; }
+        .particle-3 { left: 40%; top: 40%; animation-delay: -4s; }
+        .particle-4 { left: 55%; top: 65%; animation-delay: -6s; }
+        .particle-5 { left: 70%; top: 30%; animation-delay: -8s; }
+        .particle-6 { left: 85%; top: 55%; animation-delay: -10s; }
+        .particle-7 { left: 15%; top: 85%; animation-delay: -12s; }
+        .particle-8 { left: 60%; top: 10%; animation-delay: -1s; }
 
         @keyframes particleFloat {
           0%, 100% {
