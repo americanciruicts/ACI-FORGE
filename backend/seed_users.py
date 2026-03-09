@@ -129,6 +129,9 @@ def main():
             # User/Operator/ITAR
             ('cathy', 'KOLCsB4kTzow', 'Cathy', 'cathy@americancircuits.com', ['user', 'operator', 'itar']),
             ('larry', 'AaWtgE1hRECG', 'Larry', 'larry@americancircuits.com', ['user', 'manager', 'operator', 'itar']),
+
+            # Parts/Receiving
+            ('parts@americancircuits.com', 'theresa2025', 'Theresa', 'parts@americancircuits.com', ['user', 'operator', 'itar']),
         ]
         
         for username, password, full_name, email, roles in users_data:

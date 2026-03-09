@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://scan-truth-airfare-bug.trycloudflare.com/api/:path*"
+      "destination": "https://forge-api-two.vercel.app/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://scan-truth-airfare-bug.trycloudflare.com/health"
+      "destination": "https://forge-api-two.vercel.app/health"
     }
   ]
 }

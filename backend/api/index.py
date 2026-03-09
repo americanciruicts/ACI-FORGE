@@ -1,3 +1,8 @@
+import sys
+import os
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,14 +13,15 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel, EmailStr, validator
-import os
 from typing import Optional, List
 import re
 
 # Import our models and database configuration
-from models import User, Role, Tool, Base
+import json
+from models import User, Role, Tool, Base, Notification
 from database import get_db, engine
 from email_service import email_service
+from sqlalchemy import desc
 
 # User credential mapping for email sending
 USER_CREDENTIALS = {
@@ -49,7 +55,7 @@ security = HTTPBearer()
 app = FastAPI(title="ACI Dashboard API", version="1.0.0")
 
 # CORS middleware - configure for production
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://forge.americancircuits.net,https://www.forge.americancircuits.net").split(",")
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "https://forge.americancircuits.net,https://www.forge.americancircuits.net,https://aci-forge.vercel.app,http://localhost:3000,http://localhost:2005,http://acidashboard.aci.local:2005").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -887,3 +893,113 @@ async def send_credentials_to_user(
             detail=f"Failed to send credentials: {str(e)}"
         )
 
+
+# ---------------------------------------------------------------------------
+# Notification endpoints (super_admin only)
+# ---------------------------------------------------------------------------
+def _require_super_admin(user: User):
+    if not any(r.name == "super_admin" for r in user.roles):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super Admin access required.",
+        )
+
+
+@app.get("/api/notifications")
+@app.get("/api/notifications/")
+async def list_notifications(
+    skip: int = 0,
+    limit: int = 50,
+    unread_only: bool = False,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_super_admin(current_user)
+    q = db.query(Notification)
+    if unread_only:
+        q = q.filter(Notification.is_read == False)
+    total = q.count()
+    notifications = q.order_by(desc(Notification.created_at)).offset(skip).limit(limit).all()
+    return {
+        "notifications": [
+            {
+                "id": n.id,
+                "type": n.type,
+                "title": n.title,
+                "message": json.loads(n.message) if n.message else {},
+                "is_read": n.is_read,
+                "created_at": n.created_at.isoformat() if n.created_at else None,
+            }
+            for n in notifications
+        ],
+        "total": total,
+    }
+
+
+@app.get("/api/notifications/unread-count")
+async def unread_count(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_super_admin(current_user)
+    count = db.query(Notification).filter(Notification.is_read == False).count()
+    return {"count": count}
+
+
+@app.patch("/api/notifications/{notification_id}/read")
+async def mark_read(
+    notification_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_super_admin(current_user)
+    notif = db.query(Notification).filter(Notification.id == notification_id).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    notif.is_read = True
+    db.commit()
+    return {"message": "Marked as read"}
+
+
+@app.patch("/api/notifications/mark-all-read")
+async def mark_all_read(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    _require_super_admin(current_user)
+    db.query(Notification).filter(Notification.is_read == False).update({"is_read": True})
+    db.commit()
+    return {"message": "All notifications marked as read"}
+
+
+class ExternalLoginWebhook(BaseModel):
+    app: str
+    username: str
+    full_name: str
+    login_time: str
+    secret: str
+
+
+@app.post("/api/notifications/webhook/login")
+async def webhook_login(
+    payload: ExternalLoginWebhook,
+    db: Session = Depends(get_db),
+):
+    sso_secret = os.getenv("SSO_SECRET_KEY", "")
+    if payload.secret != sso_secret:
+        raise HTTPException(status_code=401, detail="Invalid secret")
+
+    app_name = payload.app.upper()
+    ntype = f"{payload.app.lower()}_login"
+    notif = Notification(
+        type=ntype,
+        title=f"{payload.full_name} logged into {app_name}",
+        message=json.dumps({
+            "username": payload.username,
+            "full_name": payload.full_name,
+            "login_time": payload.login_time,
+        }, default=str),
+    )
+    db.add(notif)
+    db.commit()
+    return {"message": "Notification created"}

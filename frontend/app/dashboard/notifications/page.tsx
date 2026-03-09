@@ -176,11 +176,13 @@ export default function NotificationsPage() {
       return (
         <div>
           <p className="text-sm text-gray-800">
-            <span className="font-semibold">{msg.full_name || msg.username}</span> logged in
+            <span className="font-semibold">{msg.full_name || msg.username}</span>
+            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
+            {' '}logged in
           </p>
           <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            <p>Username: <span className="font-medium text-gray-700">{msg.username}</span></p>
             {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
+            {msg.ip_address && <p>IP: <span className="font-medium text-gray-700">{msg.ip_address}</span></p>}
           </div>
         </div>
       )
@@ -190,11 +192,11 @@ export default function NotificationsPage() {
       return (
         <div>
           <p className="text-sm text-gray-800">
-            <span className="font-semibold">{msg.full_name || msg.username}</span> logged into <span className="font-semibold text-amber-700">{msg.target_app}</span> via SSO
+            <span className="font-semibold">{msg.full_name || msg.username}</span>
+            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
+            {' '}logged into <span className="font-semibold text-amber-700">{msg.target_app}</span> via SSO
           </p>
           <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            <p>Username: <span className="font-medium text-gray-700">{msg.username}</span></p>
-            <p>Target App: <span className="font-medium text-amber-700">{msg.target_app}</span></p>
             {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
           </div>
         </div>
@@ -205,10 +207,11 @@ export default function NotificationsPage() {
       return (
         <div>
           <p className="text-sm text-gray-800">
-            <span className="font-semibold">{msg.full_name || msg.username}</span> logged into <span className="font-semibold text-indigo-700">NEXUS</span>
+            <span className="font-semibold">{msg.full_name || msg.username}</span>
+            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
+            {' '}logged into <span className="font-semibold text-indigo-700">NEXUS</span>
           </p>
           <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            <p>Username: <span className="font-medium text-gray-700">{msg.username}</span></p>
             {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
           </div>
         </div>

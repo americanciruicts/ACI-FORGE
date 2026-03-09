@@ -97,7 +97,7 @@ export default function Navbar({ user }: NavbarProps) {
       const token = localStorage.getItem('accessToken')
       if (!token) return
       await fetch(`/api/notifications/${id}/read`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` },
       })
       setRecentNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
@@ -110,7 +110,7 @@ export default function Navbar({ user }: NavbarProps) {
       const token = localStorage.getItem('accessToken')
       if (!token) return
       await fetch('/api/notifications/mark-all-read', {
-        method: 'PUT',
+        method: 'PATCH',
         headers: { 'Authorization': `Bearer ${token}` },
       })
       setRecentNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
