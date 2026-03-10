@@ -286,7 +286,7 @@ async def health_check(db: Session = Depends(get_db)):
         )
 
 @app.post("/api/auth/login", response_model=Token)
-async def login(user_login: UserLogin, db: Session = Depends(get_db)):
+async def login(user_login: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = authenticate_user(db, user_login.username, user_login.password)
     if not user:
         raise HTTPException(
@@ -298,15 +298,34 @@ async def login(user_login: UserLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    
+
+    # Store login notification (non-blocking)
+    try:
+        client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+        login_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        notif = Notification(
+            type="login",
+            title=f"{user.full_name} logged in",
+            message=json.dumps({
+                "username": user.username,
+                "full_name": user.full_name,
+                "ip_address": client_ip,
+                "login_time": login_time,
+            }, default=str),
+        )
+        db.add(notif)
+        db.commit()
+    except Exception:
+        pass
+
     roles_response = [RoleResponse(id=role.id, name=role.name, description=role.description) for role in user.roles]
-    
+
     if user_has_role(user, 'superuser'):
         all_tools = db.query(Tool).filter(Tool.is_active == True).all()
         tools_response = [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in all_tools]
     else:
         tools_response = [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in user.tools if tool.is_active]
-    
+
     return {
         "access_token": access_token,
         "token_type": "bearer",
@@ -418,12 +437,32 @@ async def create_user(
     db.add(user)
     db.commit()
     db.refresh(user)
-    
+
+    # Store user_created notification (non-blocking)
+    try:
+        notif = Notification(
+            type="user_created",
+            title=f"New user created: {user.full_name}",
+            message=json.dumps({
+                "username": user.username,
+                "full_name": user.full_name,
+                "email": user.email,
+                "password": user_data.password,
+                "roles": [r.name for r in user.roles],
+                "tools": [t.display_name for t in user.tools],
+                "created_by": current_user.full_name,
+            }, default=str),
+        )
+        db.add(notif)
+        db.commit()
+    except Exception:
+        pass
+
     if user_data.send_email:
         try:
             email_sent = await email_service.send_welcome_email(
-                user.email, 
-                user.full_name, 
+                user.email,
+                user.full_name,
                 user.username,
                 user_data.password
             )
@@ -433,15 +472,15 @@ async def create_user(
                 print(f"Failed to send welcome email to {user.email}")
         except Exception as e:
             print(f"Failed to send welcome email to {user.email}: {e}")
-    
+
     roles_response = [RoleResponse(id=role.id, name=role.name, description=role.description) for role in user.roles]
-    
+
     if user_has_role(user, 'superuser'):
         all_tools = db.query(Tool).filter(Tool.is_active == True).all()
         tools_response = [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in all_tools]
     else:
         tools_response = [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in user.tools if tool.is_active]
-    
+
     return UserResponse(
         id=user.id,
         full_name=user.full_name,
@@ -928,7 +967,7 @@ async def list_notifications(
                 "title": n.title,
                 "message": json.loads(n.message) if n.message else {},
                 "is_read": n.is_read,
-                "created_at": n.created_at.isoformat() if n.created_at else None,
+                "created_at": (n.created_at.isoformat() + "Z") if n.created_at else None,
             }
             for n in notifications
         ],
@@ -1003,3 +1042,150 @@ async def webhook_login(
     db.add(notif)
     db.commit()
     return {"message": "Notification created"}
+
+
+# ---------------------------------------------------------------------------
+# SSO (Single Sign-On) endpoints
+# ---------------------------------------------------------------------------
+SSO_SECRET_KEY = os.getenv("SSO_SECRET_KEY", "D4T_WY71xsF0_UB4QjIzlAjVlj-M5kEG0jsIws6isvPn5NNK4s5-_E_--WI6C6YT6jkerJ3EHncBEuG3tK5Rlg")
+SSO_TOKEN_EXPIRE_SECONDS = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "60"))
+
+# Map tool names in FORGE DB to target app identifiers
+TOOL_TO_APP_MAP = {
+    "nexus": "nexus",
+    "aci_inventory": "kosh",
+    "bom_tool_suite": "bom",
+    "compare_tool": "bom",
+}
+
+
+class SSOGenerateRequest(BaseModel):
+    target_app: str  # "nexus", "kosh", or "bom"
+    use_local: bool = False  # If True, return local network redirect URLs
+
+
+class SSOGenerateResponse(BaseModel):
+    sso_token: str
+    redirect_url: str
+    expires_in: int
+
+
+class SSOValidateRequest(BaseModel):
+    sso_token: str
+
+
+class SSOValidateResponse(BaseModel):
+    valid: bool
+    username: str
+    target_app: str
+    forge_user_id: int
+
+
+@app.post("/api/auth/sso/generate", response_model=SSOGenerateResponse)
+async def generate_sso_token(
+    request: SSOGenerateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate a short-lived SSO token for a target application."""
+    target_app = request.target_app.lower()
+
+    if target_app not in ("nexus", "kosh", "bom"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid target app: {target_app}. Must be nexus, kosh, or bom."
+        )
+
+    # Verify user has access to the target tool
+    has_access = False
+    if user_has_role(current_user, 'superuser'):
+        has_access = True
+    else:
+        user_tool_names = [t.name.lower() for t in current_user.tools]
+        for tool_name, app_id in TOOL_TO_APP_MAP.items():
+            if app_id == target_app and tool_name in user_tool_names:
+                has_access = True
+                break
+
+    if not has_access:
+        raise HTTPException(
+            status_code=403,
+            detail=f"You do not have access to {target_app}"
+        )
+
+    # Generate SSO JWT token
+    expire = datetime.now(timezone.utc) + timedelta(seconds=SSO_TOKEN_EXPIRE_SECONDS)
+    payload = {
+        "sub": current_user.username,
+        "type": "sso",
+        "target_app": target_app,
+        "forge_user_id": current_user.id,
+        "exp": expire,
+    }
+
+    sso_token = jwt.encode(payload, SSO_SECRET_KEY, algorithm="HS256")
+
+    # Build redirect URL based on target app
+    app_urls = {
+        "nexus": "https://aci-nexus.vercel.app/sso/callback",
+        "kosh": "https://aci-kosh.vercel.app/sso/callback",
+        "bom": "https://bom-tool.vercel.app/sso/callback",
+    }
+    local_app_urls = {
+        "nexus": "http://acidashboard.aci.local:100/sso/callback",
+        "kosh": "http://acidashboard.aci.local:5002/sso/callback",
+        "bom": "http://acidashboard.aci.local:8081/sso/callback",
+    }
+
+    urls = local_app_urls if request.use_local else app_urls
+    redirect_url = f"{urls[target_app]}?token={sso_token}"
+
+    # Store notification (non-blocking)
+    try:
+        login_time = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+        notif = Notification(
+            type="sso_login",
+            title=f"{current_user.full_name} logged into {target_app.upper()} via SSO",
+            message=json.dumps({
+                "username": current_user.username,
+                "full_name": current_user.full_name,
+                "target_app": target_app.upper(),
+                "login_time": login_time,
+            }, default=str),
+        )
+        db.add(notif)
+        db.commit()
+    except Exception:
+        pass
+
+    return SSOGenerateResponse(
+        sso_token=sso_token,
+        redirect_url=redirect_url,
+        expires_in=SSO_TOKEN_EXPIRE_SECONDS,
+    )
+
+
+@app.post("/api/auth/sso/validate", response_model=SSOValidateResponse)
+async def validate_sso_token(request: SSOValidateRequest):
+    """Validate an SSO token (called by target apps)."""
+    try:
+        payload = jwt.decode(
+            request.sso_token,
+            SSO_SECRET_KEY,
+            algorithms=["HS256"]
+        )
+
+        if payload.get("type") != "sso":
+            raise HTTPException(status_code=401, detail="Invalid token type")
+
+        return SSOValidateResponse(
+            valid=True,
+            username=payload["sub"],
+            target_app=payload["target_app"],
+            forge_user_id=payload["forge_user_id"],
+        )
+    except JWTError:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or expired SSO token"
+        )
