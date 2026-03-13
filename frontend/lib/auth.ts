@@ -11,7 +11,7 @@ const SECURITY_CONFIG = {
   TOKEN_EXPIRY_BUFFER: 5 * 60 * 1000, // 5 minutes before expiry
   MAX_LOGIN_ATTEMPTS: 100,
   LOGIN_ATTEMPT_WINDOW: 15 * 60 * 1000, // 15 minutes
-  SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+  SESSION_TIMEOUT: 8 * 60 * 60 * 1000, // 8 hours
 }
 
 // Security utilities
@@ -397,9 +397,9 @@ export function validateSession(): { isValid: boolean, user: User | null, token:
     const loginTime = lastLogin ? new Date(lastLogin) : null
     const now = new Date()
 
-    // Check if session is older than 10 hours (token expiry)
-    if (loginTime && (now.getTime() - loginTime.getTime()) > 10 * 60 * 60 * 1000) {
-      console.warn('Session expired after 10 hours')
+    // Check if session is older than 8 hours (token expiry)
+    if (loginTime && (now.getTime() - loginTime.getTime()) > 8 * 60 * 60 * 1000) {
+      console.warn('Session expired after 8 hours')
       clearUserSession()
       return { isValid: false, user: null, token: null }
     }

@@ -49,7 +49,7 @@ class SecurityConfig:
     PASSWORD_REQUIRE_SPECIAL = True
     
     # Session security
-    SESSION_TIMEOUT = 30 * 60  # 30 minutes
+    SESSION_TIMEOUT = 8 * 60 * 60  # 8 hours
     MAX_CONCURRENT_SESSIONS = 5
     
     # Content Security Policy
