@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Wrench } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 export default function SubmitMaintenancePage() {
   const [user, setUser] = useState<User | null>(null)
@@ -48,6 +49,7 @@ export default function SubmitMaintenancePage() {
       <Navbar user={user} />
 
       <main className="max-w-5xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: 'Maintenance', href: '/dashboard/maintenance/submit' }, { label: 'Submit Request' }]} />
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Wrench className="h-6 w-6 text-[#0066B3]" />

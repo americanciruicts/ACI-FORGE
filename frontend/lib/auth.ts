@@ -377,7 +377,6 @@ export function clearUserSession(): void {
     // Clear sessionStorage completely
     sessionStorage.clear()
 
-    console.log('Session cleared successfully')
   } catch (error) {
     console.error('Error clearing session:', error)
   }

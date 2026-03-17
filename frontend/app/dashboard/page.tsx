@@ -7,8 +7,8 @@ import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken } fr
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
 
-const LOCAL_FORGE_URL = 'http://acidashboard.aci.local:2005'
-const LOCAL_API_URL = 'http://acidashboard.aci.local:2003'
+const LOCAL_FORGE_URL = process.env.NEXT_PUBLIC_LOCAL_FORGE_URL || 'http://acidashboard.aci.local:2005'
+const LOCAL_API_URL = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://acidashboard.aci.local:2003'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
@@ -38,37 +38,30 @@ export default function DashboardPage() {
         return 999
       }
       return [...tools].sort((a, b) => getOrderIndex(a) - getOrderIndex(b))
-    } catch {
+    } catch (err) { console.error('Error sorting tools:', err);
       return user?.tools || []
     }
   })()
 
   useEffect(() => {
-    console.log('ACI FORGE useEffect triggered')
     const token = localStorage.getItem('accessToken')
     const userData = localStorage.getItem('user')
 
-    console.log('Token exists:', !!token)
-    console.log('UserData exists:', !!userData)
-
     if (!token || !userData) {
-      console.log('No token or userData found, redirecting to login')
       router.push('/login')
       return
     }
 
     try {
       const parsedUser = JSON.parse(userData)
-      console.log('Parsed user:', parsedUser.username)
       setUser(parsedUser)
 
       // Skip token validation for now - just set the user and fetch admin stats if needed
       if (isSuperUser(parsedUser)) {
-        console.log('User is super user, fetching admin stats')
         fetchAdminStats(token)
       }
     } catch (err) {
-      console.log('Error parsing user data:', err)
+      console.error('Error parsing user data:', err)
       clearUserSession()
       router.push('/login')
     }

@@ -3,7 +3,7 @@ Maintenance Request Router
 API endpoints for maintenance request management
 """
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import json
@@ -29,6 +29,7 @@ from app.schemas.maintenance_request import (
 from app.services.maintenance_request import MaintenanceRequestService
 from app.services.user import UserService
 from app.services.email import email_service
+from app.services.audit import AuditService
 from app.utils.file_upload import (
     save_upload_file,
     save_multiple_files,
@@ -372,6 +373,7 @@ def update_maintenance_request(
 def update_request_status(
     request_id: int,
     status_update: StatusUpdate,
+    request: Request,
     current_user: User = Depends(require_maintenance_or_superuser),
     db: Session = Depends(get_db)
 ):
@@ -386,6 +388,21 @@ def update_request_status(
         status_update.status,
         current_user
     )
+
+    # Audit log: maintenance request status change
+    try:
+        client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+        AuditService.log(
+            db,
+            action="maintenance_status_change",
+            user_id=current_user.id,
+            resource_type="maintenance_request",
+            resource_id=request_id,
+            details={"new_status": status_update.status.value if hasattr(status_update.status, 'value') else str(status_update.status)},
+            ip_address=client_ip,
+        )
+    except Exception:
+        pass
 
     return MaintenanceRequestResponse(
         id=updated_request.id,

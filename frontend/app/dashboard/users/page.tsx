@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Edit, Search, Trash2, Key, Eye, EyeOff, User as UserIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 interface Role {
   id: number
@@ -427,6 +428,7 @@ export default function UserManagementPage() {
 
       {/* Main Content */}
       <main className="px-4 md:px-6 py-6 md:py-8 pb-16 bg-white min-h-screen">
+          <Breadcrumbs items={[{ label: 'User Management' }]} />
           <div className="mb-6 md:mb-10">
             <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
               <div>
@@ -443,7 +445,11 @@ export default function UserManagementPage() {
                 </button>
 
                 <button
-                  onClick={handleSendCredentialsToAll}
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to send credentials to ALL users? This will email every user in the system.')) {
+                      handleSendCredentialsToAll()
+                    }
+                  }}
                   disabled={isSendingEmails}
                   className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-sm md:text-base"
                 >

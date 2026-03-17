@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Bell, CheckCheck, LogIn, UserPlus, Eye, ExternalLink, Filter, Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { User } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 interface NotificationData {
   id: number
@@ -104,7 +105,7 @@ export default function NotificationsPage() {
       setNotifications(prev =>
         prev.map(n => n.id === id ? { ...n, is_read: true } : n)
       )
-    } catch {}
+    } catch (err) { console.error('Failed to mark notification as read:', err) }
   }
 
   const markAllAsRead = async () => {
@@ -115,7 +116,7 @@ export default function NotificationsPage() {
         headers: { 'Authorization': `Bearer ${token}` },
       })
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
-    } catch {}
+    } catch (err) { console.error('Failed to mark all as read:', err) }
   }
 
   const clearAllRead = async () => {
@@ -126,7 +127,7 @@ export default function NotificationsPage() {
         headers: { 'Authorization': `Bearer ${token}` },
       })
       setNotifications(prev => prev.filter(n => !n.is_read))
-    } catch {}
+    } catch (err) { console.error('Failed to clear read notifications:', err) }
   }
 
   const formatTime = (dateStr: string | null) => {
@@ -282,6 +283,7 @@ export default function NotificationsPage() {
       <Navbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: 'Notifications' }]} />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <div>

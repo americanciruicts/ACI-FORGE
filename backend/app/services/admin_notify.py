@@ -9,14 +9,13 @@ import logging
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from app.services.email import email_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Only Preet and Kanav receive these notifications
-ADMIN_NOTIFY_EMAILS = [
-    "preet@americancircuits.com",
-    "kanav@americancircuits.com",
-]
+# Admin notification recipients loaded from environment variable
+# Falls back to default values if ADMIN_NOTIFY_EMAILS env var is not set
+ADMIN_NOTIFY_EMAILS = settings.admin_notify_emails_list
 
 
 class AdminNotifyService:

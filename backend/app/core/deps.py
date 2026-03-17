@@ -10,6 +10,7 @@ from app.db.session import get_db
 from app.services.auth import AuthService
 from app.services.user import UserService
 from app.models.user import User
+from app.core.security import is_token_blacklisted
 
 # OAuth2 security scheme
 security = HTTPBearer()
@@ -27,7 +28,11 @@ def get_current_user(
     
     # Extract token
     token = credentials.credentials
-    
+
+    # Check if token has been blacklisted (logged out)
+    if is_token_blacklisted(token):
+        raise credentials_exception
+
     # Get user from token
     user = AuthService.get_user_from_token(db, token, "access")
     if user is None:

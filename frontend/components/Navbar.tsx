@@ -57,7 +57,7 @@ export default function Navbar({ user }: NavbarProps) {
         const data = await res.json()
         setUnreadCount(data.count || 0)
       }
-    } catch {}
+    } catch (err) { console.error('Failed to fetch unread count:', err) }
   }, [isSuperAdmin])
 
   const fetchRecentNotifications = useCallback(async () => {
@@ -73,7 +73,7 @@ export default function Navbar({ user }: NavbarProps) {
         const data = await res.json()
         setRecentNotifications(data.notifications || [])
       }
-    } catch {} finally {
+    } catch (err) { console.error('Failed to fetch notifications:', err) } finally {
       setLoadingNotifications(false)
     }
   }, [isSuperAdmin])
@@ -102,7 +102,7 @@ export default function Navbar({ user }: NavbarProps) {
       })
       setRecentNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
       fetchUnreadCount()
-    } catch {}
+    } catch (err) { console.error('Failed to mark notification as read:', err) }
   }, [fetchUnreadCount])
 
   const markAllAsRead = useCallback(async () => {
@@ -115,7 +115,7 @@ export default function Navbar({ user }: NavbarProps) {
       })
       setRecentNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
       setUnreadCount(0)
-    } catch {}
+    } catch (err) { console.error('Failed to mark all as read:', err) }
   }, [])
 
   useEffect(() => {
@@ -136,6 +136,19 @@ export default function Navbar({ user }: NavbarProps) {
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Close dropdowns on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setBellDropdownOpen(false)
+        setUserDropdownOpen(false)
+        setMobileMenuOpen(false)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
 
   return (
@@ -178,7 +191,7 @@ export default function Navbar({ user }: NavbarProps) {
         </div>
 
         {/* Desktop Navigation Menu */}
-        <nav className="hidden lg:flex items-center space-x-1">
+        <nav className="hidden lg:flex items-center space-x-1" aria-label="Main navigation">
           <button
             onClick={() => router.push('/dashboard')}
             className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 ${
@@ -247,6 +260,7 @@ export default function Navbar({ user }: NavbarProps) {
                 className="relative p-2 text-white hover:bg-white/15 rounded-xl transition-all duration-200 active:scale-95"
                 style={{ outline: 'none', userSelect: 'none' }}
                 title="Notifications"
+                aria-expanded={bellDropdownOpen}
               >
                 <Bell className="h-5 w-5" />
                 {unreadCount > 0 && (
@@ -258,7 +272,7 @@ export default function Navbar({ user }: NavbarProps) {
 
               {/* Bell Dropdown */}
               {bellDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden" role="menu">
                   {/* Header */}
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50">
                     <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
@@ -361,6 +375,8 @@ export default function Navbar({ user }: NavbarProps) {
             }}
             className="flex items-center space-x-3 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 transition-all duration-200 active:scale-95"
             style={{ outline: 'none', userSelect: 'none' }}
+            aria-expanded={userDropdownOpen}
+            aria-label="User menu"
           >
             {/* Avatar */}
             <div className="w-10 h-10 bg-gradient-to-br from-white to-gray-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-md border-2 border-white/50">
@@ -378,7 +394,7 @@ export default function Navbar({ user }: NavbarProps) {
                     key={role.id}
                     className="text-[10px] bg-white/20 text-white/90 px-2 py-0.5 rounded-full font-medium uppercase tracking-wide"
                   >
-                    {role.name === 'superuser' ? 'Admin' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
+                    {role.name === 'superuser' ? 'Super User' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
                   </span>
                 ))}
               </div>
@@ -394,7 +410,7 @@ export default function Navbar({ user }: NavbarProps) {
 
           {/* User Dropdown Menu */}
           {userDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 overflow-hidden" role="menu">
               {/* User Header */}
               <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50">
                 <div className="flex items-center space-x-3">
@@ -427,6 +443,7 @@ export default function Navbar({ user }: NavbarProps) {
                   }}
                   className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-[#0066B3] transition-all duration-200 flex items-center space-x-3"
                   style={{ outline: 'none', userSelect: 'none' }}
+                  role="menuitem"
                 >
                   <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                     <UserIcon className="h-4 w-4 text-gray-600" />
@@ -442,6 +459,7 @@ export default function Navbar({ user }: NavbarProps) {
                     }}
                     className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-all duration-200 flex items-center space-x-3"
                     style={{ outline: 'none', userSelect: 'none' }}
+                    role="menuitem"
                   >
                     <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center relative">
                       <Bell className="h-4 w-4 text-gray-600" />
@@ -467,6 +485,7 @@ export default function Navbar({ user }: NavbarProps) {
                   }}
                   className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 flex items-center space-x-3"
                   style={{ outline: 'none', userSelect: 'none' }}
+                  role="menuitem"
                 >
                   <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                     <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,6 +502,7 @@ export default function Navbar({ user }: NavbarProps) {
                   onClick={handleLogout}
                   className="w-full text-left px-3 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 flex items-center space-x-3 rounded-lg"
                   style={{ outline: 'none', userSelect: 'none' }}
+                  role="menuitem"
                 >
                   <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
                     <LogOut className="h-4 w-4 text-red-500" />
@@ -566,7 +586,7 @@ export default function Navbar({ user }: NavbarProps) {
                   key={role.id}
                   className="text-xs bg-[#0066B3]/10 text-[#0066B3] px-2.5 py-1 rounded-full font-semibold uppercase"
                 >
-                  {role.name === 'superuser' ? 'Admin' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
+                  {role.name === 'superuser' ? 'Super User' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
                 </span>
               ))}
             </div>

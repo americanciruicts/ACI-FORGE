@@ -2,13 +2,17 @@
 File Upload Utilities for Maintenance Requests
 Handles secure file uploads, validation, and storage
 """
+import logging
 import os
 import uuid
 import shutil
+import urllib.parse
 from pathlib import Path
 from typing import List, Optional
 from fastapi import UploadFile, HTTPException, status
 import mimetypes
+
+logger = logging.getLogger(__name__)
 
 
 # Configuration
@@ -42,10 +46,40 @@ ALLOWED_MIME_TYPES = {
 }
 
 
+# Magic bytes signatures for file type detection
+MAGIC_BYTES = {
+    b"\xff\xd8\xff": "image/jpeg",
+    b"\x89PNG": "image/png",            # 89 50 4E 47
+    b"GIF87a": "image/gif",
+    b"GIF89a": "image/gif",
+    b"%PDF": "application/pdf",
+    b"PK\x03\x04": "application/zip",   # Also covers .docx, .xlsx, .pptx
+    b"BM": "image/bmp",
+    b"RIFF": "image/webp",              # RIFF....WEBP (partial check)
+    b"Rar!\x1a\x07": "application/x-rar-compressed",
+}
+
+
+def detect_mime_from_content(file_header: bytes) -> Optional[str]:
+    """
+    Detect MIME type from the first bytes of file content using magic bytes.
+
+    Args:
+        file_header: The first 16+ bytes of the file
+
+    Returns:
+        Detected MIME type string, or None if unknown
+    """
+    for signature, mime_type in MAGIC_BYTES.items():
+        if file_header.startswith(signature):
+            return mime_type
+    return None
+
+
 def init_upload_directory():
     """Initialize upload directory if it doesn't exist"""
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"Upload directory initialized: {UPLOAD_DIR.absolute()}")
+    logger.info("Upload directory initialized: %s", UPLOAD_DIR.absolute())
 
 
 def validate_file(file: UploadFile) -> None:
@@ -82,12 +116,41 @@ def validate_file(file: UploadFile) -> None:
             detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
         )
 
-    # Validate MIME type
+    # Validate MIME type (client-provided)
     if file.content_type not in ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Invalid file type: {file.content_type}"
         )
+
+    # Validate MIME type by inspecting file content (magic bytes)
+    try:
+        file_header = file.file.read(16)
+        file.file.seek(0)  # Reset to beginning
+        detected_mime = detect_mime_from_content(file_header)
+        if detected_mime is not None:
+            # For ZIP-based formats (.docx, .xlsx), the magic bytes show as
+            # application/zip which is acceptable for Office documents
+            zip_compatible = {
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.ms-excel",
+            }
+            claimed = file.content_type
+            if detected_mime != claimed:
+                # Allow ZIP-based Office formats
+                if not (detected_mime == "application/zip" and claimed in zip_compatible):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"File content does not match claimed type. "
+                               f"Claimed: {claimed}, Detected: {detected_mime}",
+                    )
+    except HTTPException:
+        raise
+    except Exception:
+        # If we can't read the header, skip magic byte check
+        pass
 
 
 def generate_unique_filename(original_filename: str) -> str:
@@ -203,7 +266,7 @@ def delete_file(filename: str) -> bool:
             return True
         return False
     except Exception as e:
-        print(f"Error deleting file {filename}: {e}")
+        logger.error("Error deleting file %s: %s", filename, e)
         return False
 
 
@@ -237,8 +300,14 @@ def get_file_path(filename: str) -> Path:
     Raises:
         HTTPException: If file doesn't exist or path is invalid
     """
-    # Prevent path traversal attacks
+    # Prevent path traversal attacks - check for URL-encoded sequences
+    decoded_filename = urllib.parse.unquote(filename)
     if ".." in filename or "/" in filename or "\\" in filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename"
+        )
+    if ".." in decoded_filename or "/" in decoded_filename or "\\" in decoded_filename:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid filename"
@@ -246,13 +315,22 @@ def get_file_path(filename: str) -> Path:
 
     file_path = UPLOAD_DIR / filename
 
-    if not file_path.exists() or not file_path.is_file():
+    # Resolve to absolute paths and verify the file is within the upload directory
+    resolved_path = file_path.resolve()
+    upload_dir_resolved = UPLOAD_DIR.resolve()
+    if not str(resolved_path).startswith(str(upload_dir_resolved) + os.sep) and resolved_path != upload_dir_resolved:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename"
+        )
+
+    if not resolved_path.exists() or not resolved_path.is_file():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="File not found"
         )
 
-    return file_path
+    return resolved_path
 
 
 def get_file_info(filename: str) -> dict:

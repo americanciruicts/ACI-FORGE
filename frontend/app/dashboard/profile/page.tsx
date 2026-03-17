@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { User as UserIcon, Mail, Shield, Clock, Wrench } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
+import Breadcrumbs from '@/components/Breadcrumbs'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
@@ -67,6 +68,7 @@ export default function ProfilePage() {
       <Navbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
+        <Breadcrumbs items={[{ label: 'Profile' }]} />
         {/* Profile Header with Gradient + PCB Pattern */}
         <div className="bg-gradient-to-br from-[#003d6a] via-[#0066B3] to-[#0077CC] rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden mb-6">
           {/* PCB Circuit Pattern */}

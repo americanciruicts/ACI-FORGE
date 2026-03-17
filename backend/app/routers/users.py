@@ -2,7 +2,8 @@
 User-related routes for authenticated users
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+import logging
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.core.deps import get_current_active_user
@@ -14,6 +15,9 @@ from app.services.user import UserService
 from app.services.auth import AuthService
 from app.services.user_sync import UserSyncService
 from app.services.admin_notify import AdminNotifyService
+from app.services.audit import AuditService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/users", tags=["users"])
 
@@ -109,6 +113,7 @@ async def get_all_users_admin(
 @router.post("", response_model=dict, include_in_schema=False)
 async def create_user_admin(
     user_data: dict,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -128,30 +133,51 @@ async def create_user_admin(
         plain_password = user_data["password"]
         password_hash = get_password_hash(plain_password)
 
-        # Create user
-        user = User(
-            full_name=user_data["full_name"],
-            username=user_data["username"].lower(),
-            email=user_data["email"].lower(),
-            password_hash=password_hash,
-            is_active=True
-        )
-
-        # Add roles
-        if "role_ids" in user_data:
-            roles = db.query(Role).filter(Role.id.in_(user_data["role_ids"])).all()
-            user.roles = roles
-
-        # Add tools
+        # Create user in an atomic transaction
         assigned_tools = []
-        if "tool_ids" in user_data:
-            tools = db.query(Tool).filter(Tool.id.in_(user_data["tool_ids"])).all()
-            user.tools = tools
-            assigned_tools = tools
+        try:
+            user = User(
+                full_name=user_data["full_name"],
+                username=user_data["username"].lower(),
+                email=user_data["email"].lower(),
+                password_hash=password_hash,
+                is_active=True
+            )
 
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+            # Add roles
+            if "role_ids" in user_data:
+                roles = db.query(Role).filter(Role.id.in_(user_data["role_ids"])).all()
+                user.roles = roles
+
+            # Add tools
+            if "tool_ids" in user_data:
+                tools = db.query(Tool).filter(Tool.id.in_(user_data["tool_ids"])).all()
+                user.tools = tools
+                assigned_tools = tools
+
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+        except Exception:
+            db.rollback()
+            raise
+
+        # --- Outside the transaction: side effects ---
+
+        # Audit log: user creation
+        try:
+            client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+            AuditService.log(
+                db,
+                action="user_create",
+                user_id=current_user.id,
+                resource_type="user",
+                resource_id=user.id,
+                details={"username": user.username, "email": user.email},
+                ip_address=client_ip,
+            )
+        except Exception:
+            pass
 
         # Cross-app user sync (non-blocking)
         sync_results = {}
@@ -166,10 +192,9 @@ async def create_user_admin(
                 tool_names=tool_names,
             )
         except Exception as sync_err:
-            import logging
-            logging.getLogger(__name__).error(f"User sync error: {sync_err}", exc_info=True)
+            logger.error("User sync error: %s", sync_err, exc_info=True)
 
-        # Notify Preet & Kanav about new user (non-blocking)
+        # Notify admins about new user (non-blocking)
         try:
             tool_display_names = [t.display_name for t in assigned_tools]
             AdminNotifyService.notify_new_user_created(
@@ -182,8 +207,7 @@ async def create_user_admin(
                 created_by=current_user.full_name,
             )
         except Exception as notify_err:
-            import logging
-            logging.getLogger(__name__).error(f"Admin notify error: {notify_err}", exc_info=True)
+            logger.error("Admin notify error: %s", notify_err, exc_info=True)
 
         # Store in-app notification record (non-blocking)
         try:
@@ -227,6 +251,7 @@ async def create_user_admin(
 async def update_user_admin(
     user_id: int,
     user_data: dict,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -269,7 +294,22 @@ async def update_user_admin(
         
         db.commit()
         db.refresh(user)
-        
+
+        # Audit log: user update
+        try:
+            client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+            AuditService.log(
+                db,
+                action="user_update",
+                user_id=current_user.id,
+                resource_type="user",
+                resource_id=user.id,
+                details={"username": user.username, "changes": list(user_data.keys())},
+                ip_address=client_ip,
+            )
+        except Exception:
+            pass
+
         return {
             "id": user.id,
             "full_name": user.full_name,
@@ -287,6 +327,7 @@ async def update_user_admin(
 @router.delete("/{user_id}")
 async def delete_user_admin(
     user_id: int,
+    request: Request,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -313,8 +354,25 @@ async def delete_user_admin(
         )
     
     try:
+        deleted_username = user.username
         db.delete(user)
         db.commit()
+
+        # Audit log: user deletion
+        try:
+            client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+            AuditService.log(
+                db,
+                action="user_delete",
+                user_id=current_user.id,
+                resource_type="user",
+                resource_id=user_id,
+                details={"deleted_username": deleted_username},
+                ip_address=client_ip,
+            )
+        except Exception:
+            pass
+
         return {"message": "User deleted successfully"}
     except Exception as e:
         db.rollback()
@@ -346,12 +404,12 @@ async def send_credentials_to_all_users(
         for user in users:
             try:
                 # In a real implementation, you would send actual emails here
-                print(f"Sending credentials to {user.email}")
-                print(f"Username: {user.username}")
-                print(f"Email: {user.email}")
+                logger.info("Sending credentials to %s", user.email)
+                logger.info("Username: %s", user.username)
+                logger.info("Email: %s", user.email)
                 successful_sends += 1
             except Exception as e:
-                print(f"Failed to send email to {user.email}: {e}")
+                logger.error("Failed to send email to %s: %s", user.email, e)
                 failed_sends += 1
         
         return {
@@ -389,9 +447,9 @@ async def send_credentials_to_user(
     
     try:
         # In a real implementation, you would send actual emails here
-        print(f"Sending credentials to {user.email}")
-        print(f"Username: {user.username}")
-        print(f"Email: {user.email}")
+        logger.info("Sending credentials to %s", user.email)
+        logger.info("Username: %s", user.username)
+        logger.info("Email: %s", user.email)
         
         return {
             "message": f"Credentials sent successfully to {user.email}",

@@ -2,8 +2,9 @@
 Security utilities for authentication and authorization
 """
 
+import threading
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Any, Set
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
@@ -11,6 +12,22 @@ from .config import settings
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# In-memory token blacklist for logout invalidation
+_token_blacklist: Set[str] = set()
+_blacklist_lock = threading.Lock()
+
+
+def blacklist_token(token: str) -> None:
+    """Add a token to the blacklist (called on logout)"""
+    with _blacklist_lock:
+        _token_blacklist.add(token)
+
+
+def is_token_blacklisted(token: str) -> bool:
+    """Check if a token has been blacklisted"""
+    with _blacklist_lock:
+        return token in _token_blacklist
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against a hashed password"""

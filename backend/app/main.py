@@ -3,12 +3,58 @@ FastAPI ACI FORGE Application
 Main application entry point with all routes and middleware
 """
 
+import logging
+from urllib.parse import urlparse
 from fastapi import FastAPI, Request, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError, BaseModel
 from sqlalchemy.orm import Session
+from starlette.middleware.base import BaseHTTPMiddleware
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+
+
+class CSRFMiddleware(BaseHTTPMiddleware):
+    """
+    CSRF protection middleware.
+    Checks Origin/Referer header against allowed origins for state-changing requests.
+    Skips CSRF check for API requests with Bearer tokens (already auth-protected).
+    """
+
+    STATE_CHANGING_METHODS = {"POST", "PUT", "DELETE", "PATCH"}
+
+    def __init__(self, app, allowed_origins: list):
+        super().__init__(app)
+        # Normalise allowed origins to lowercase without trailing slashes
+        self.allowed_origins = {o.rstrip("/").lower() for o in allowed_origins}
+
+    async def dispatch(self, request: Request, call_next):
+        if request.method in self.STATE_CHANGING_METHODS:
+            # Skip CSRF for requests that carry a Bearer token (API calls)
+            auth_header = request.headers.get("authorization", "")
+            if auth_header.lower().startswith("bearer "):
+                return await call_next(request)
+
+            # Check Origin or Referer
+            origin = request.headers.get("origin")
+            referer = request.headers.get("referer")
+
+            request_origin = None
+            if origin:
+                request_origin = origin.rstrip("/").lower()
+            elif referer:
+                parsed = urlparse(referer)
+                request_origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/").lower()
+
+            if request_origin and request_origin not in self.allowed_origins:
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "CSRF validation failed: origin not allowed"},
+                )
+
+        return await call_next(request)
 from app.routers import auth_router, admin_router, tools_router, users_router, maintenance_requests_router, sso_router
 from app.routers.notifications import router as notifications_router
 
@@ -35,6 +81,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add CSRF middleware (checks Origin/Referer for state-changing requests)
+app.add_middleware(CSRFMiddleware, allowed_origins=settings.allowed_origins_list)
 
 # Global exception handlers
 @app.exception_handler(ValidationError)

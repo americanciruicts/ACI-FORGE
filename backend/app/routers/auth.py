@@ -2,6 +2,10 @@
 Authentication routes
 """
 
+import logging
+import threading
+import time
+from collections import defaultdict
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
@@ -11,9 +15,46 @@ from app.schemas.tool import Tool as ToolSchema
 from app.services.auth import AuthService
 from app.services.user import UserService
 from app.services.admin_notify import AdminNotifyService
-from app.core.security import create_access_token
+from app.services.audit import AuditService
+from app.core.security import create_access_token, blacklist_token
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import datetime, timedelta, timezone
+from typing import Dict
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
+security = HTTPBearer()
+
+# In-memory rate limiter for login attempts
+_login_attempts: Dict[str, list] = defaultdict(list)
+_rate_limit_lock = threading.Lock()
+LOGIN_RATE_LIMIT = 5  # max failed attempts
+LOGIN_RATE_WINDOW = 15 * 60  # 15 minutes in seconds
+
+
+def _check_rate_limit(ip: str) -> None:
+    """Check if the IP has exceeded the login rate limit. Raises 429 if so."""
+    now = time.time()
+    with _rate_limit_lock:
+        # Prune old attempts outside the window
+        _login_attempts[ip] = [t for t in _login_attempts[ip] if now - t < LOGIN_RATE_WINDOW]
+        if len(_login_attempts[ip]) >= LOGIN_RATE_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed login attempts. Please try again later.",
+            )
+
+
+def _record_failed_attempt(ip: str) -> None:
+    """Record a failed login attempt for the given IP."""
+    with _rate_limit_lock:
+        _login_attempts[ip].append(time.time())
+
+
+def _clear_attempts(ip: str) -> None:
+    """Clear login attempts for an IP after successful login."""
+    with _rate_limit_lock:
+        _login_attempts.pop(ip, None)
 
 router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
@@ -26,14 +67,36 @@ async def login(
     """
     Login endpoint that returns access and refresh tokens
     """
+    # Rate limit check
+    client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
+    _check_rate_limit(client_ip)
+
     # Authenticate user
     user = AuthService.authenticate_user(db, login_data)
     if not user:
+        _record_failed_attempt(client_ip)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    # Clear rate limit on successful login
+    _clear_attempts(client_ip)
+
+    # Audit log: successful login
+    try:
+        AuditService.log(
+            db,
+            action="login",
+            user_id=user.id,
+            resource_type="user",
+            resource_id=user.id,
+            details={"username": user.username},
+            ip_address=client_ip,
+        )
+    except Exception:
+        pass
 
     # Create tokens
     tokens = AuthService.create_user_tokens(user)
@@ -119,10 +182,14 @@ async def refresh_token(
     )
 
 @router.post("/logout")
-async def logout():
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """
-    Logout endpoint (client should discard tokens)
+    Logout endpoint - blacklists the provided token so it cannot be reused
     """
+    token = credentials.credentials
+    blacklist_token(token)
     return {"message": "Successfully logged out"}
 
 @router.post("/reset-password", response_model=PasswordResetResponse)

@@ -50,6 +50,17 @@ class Settings(BaseSettings):
         """Parse ALLOWED_ORIGINS string into a list"""
         return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
     
+    # Admin notification recipients (comma-separated)
+    ADMIN_NOTIFY_EMAILS: str = os.getenv(
+        "ADMIN_NOTIFY_EMAILS",
+        "preet@americancircuits.com,kanav@americancircuits.com"
+    )
+
+    @property
+    def admin_notify_emails_list(self) -> List[str]:
+        """Parse ADMIN_NOTIFY_EMAILS string into a list"""
+        return [e.strip() for e in self.ADMIN_NOTIFY_EMAILS.split(",") if e.strip()]
+
     # Email Configuration
     SMTP_SERVER: str = os.getenv("SMTP_SERVER", "")
     SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
