@@ -42,7 +42,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0066B3]"></div>
       </div>
     )
@@ -64,7 +64,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
@@ -132,31 +132,31 @@ export default function ProfilePage() {
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {/* Account Info */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
               <UserIcon className="h-4 w-4" />
               Account Information
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Full Name</label>
-                <p className="text-sm font-semibold text-gray-900">{user.full_name}</p>
+                <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">Full Name</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.full_name}</p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Username</label>
-                <p className="text-sm font-semibold text-gray-900">@{user.username}</p>
+                <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">Username</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">@{user.username}</p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Email Address</label>
-                <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">Email Address</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5 text-gray-400" />
                   {user.email}
                 </p>
               </div>
               {lastLogin && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-1">Last Login</label>
-                  <p className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+                  <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-1">Last Login</label>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-1.5">
                     <Clock className="h-3.5 w-3.5 text-gray-400" />
                     {lastLogin}
                   </p>
@@ -166,19 +166,19 @@ export default function ProfilePage() {
           </div>
 
           {/* Roles & Access */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Roles & Access
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2">System Roles</label>
+                <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-2">System Roles</label>
                 <div className="flex flex-wrap gap-2">
                   {user.roles?.map((role) => (
                     <span
                       key={role.id}
-                      className="bg-[#0066B3]/10 text-[#0066B3] px-3 py-1.5 rounded-lg text-xs font-semibold"
+                      className="bg-[#0066B3]/10 dark:bg-blue-900/40 text-[#0066B3] dark:text-blue-300 px-3 py-1.5 rounded-lg text-xs font-semibold"
                     >
                       {formatRoleName(role.name)}
                     </span>
@@ -186,9 +186,9 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2">Account Status</label>
+                <label className="block text-xs font-medium text-gray-400 dark:text-gray-500 mb-2">Account Status</label>
                 <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                  user.is_active ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+                  user.is_active ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
                 }`}>
                   <span className={`w-2 h-2 rounded-full mr-2 ${user.is_active ? 'bg-green-500' : 'bg-red-500'}`}></span>
                   {user.is_active ? 'Active' : 'Inactive'}
@@ -200,8 +200,8 @@ export default function ProfilePage() {
 
         {/* Assigned Tools */}
         {user.tools && user.tools.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+            <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center gap-2">
               <Wrench className="h-4 w-4" />
               Assigned Tools
             </h3>
@@ -209,10 +209,10 @@ export default function ProfilePage() {
               {user.tools.map((tool: any) => (
                 <div
                   key={tool.id}
-                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center hover:bg-blue-50 hover:border-[#0066B3]/30 transition-all"
+                  className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3 text-center hover:bg-blue-50 dark:hover:bg-gray-600 hover:border-[#0066B3]/30 transition-all"
                 >
                   <Wrench className="h-5 w-5 text-[#0066B3] mx-auto mb-1.5" />
-                  <p className="text-xs font-semibold text-gray-800">{tool.display_name || tool.name}</p>
+                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{tool.display_name || tool.name}</p>
                 </div>
               ))}
             </div>

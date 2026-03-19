@@ -34,7 +34,7 @@ export default function SubmitMaintenancePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0066B3]"></div>
       </div>
     )
@@ -45,20 +45,20 @@ export default function SubmitMaintenancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar user={user} />
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         <Breadcrumbs items={[{ label: 'Maintenance', href: '/dashboard/maintenance/submit' }, { label: 'Submit Request' }]} />
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             <Wrench className="h-6 w-6 text-[#0066B3]" />
             Submit Maintenance Request
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Fill out the form below to submit a maintenance request</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill out the form below to submit a maintenance request</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <iframe
             src="https://aci.lmhosted.com/formsm/public/form/new/975dee18-714b-498a-9d1d-6fcdac49e21c"
             width="100%"

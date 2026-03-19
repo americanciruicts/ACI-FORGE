@@ -27,6 +27,28 @@
   --radius: 0.75rem;
 }
 
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 8%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 8%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 221 83% 53%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 217 33% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 224 76% 48%;
+}
+
 @layer base {
   * {
     border-color: hsl(var(--border));
@@ -101,6 +123,14 @@ html, body {
   background: #ffffff;
   background-attachment: fixed;
   min-height: 100vh;
+}
+
+.dark body, html.dark body {
+  background: #0f1623;
+  color: #e2e8f0;
+}
+
+html, body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -231,6 +261,18 @@ div, span, p, h1, h2, h3, h4, h5, h6, section, article, nav, header, footer {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 /* Form enhancements */
@@ -410,3 +452,19 @@ body {
 [data-gramm] {
   /* These are commonly added by browser extensions */
 }
+
+/* Toast animation */
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-in.slide-in-from-right {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+/* Dark mode toast colors */
+.dark .toast-success { background: #064e3b; border-color: #065f46; }
+.dark .toast-error { background: #7f1d1d; border-color: #991b1b; }
+.dark .toast-warning { background: #78350f; border-color: #92400e; }
+.dark .toast-info { background: #1e3a5f; border-color: #1e40af; }

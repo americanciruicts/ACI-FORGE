@@ -6,6 +6,7 @@ import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, MessageCir
 import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
+import { CardSkeleton, ToolCardSkeleton } from '@/components/Skeleton'
 
 const LOCAL_FORGE_URL = process.env.NEXT_PUBLIC_LOCAL_FORGE_URL || 'http://acidashboard.aci.local:2005'
 const LOCAL_API_URL = process.env.NEXT_PUBLIC_LOCAL_API_URL || 'http://acidashboard.aci.local:2003'
@@ -138,8 +139,16 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0066B3]"></div>
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <div className="px-4 md:px-6 py-6 md:py-8">
+          <div className="mb-8 md:mb-10 bg-gradient-to-br from-[#003d6a] via-[#0066B3] to-[#0077CC] rounded-2xl p-6 md:p-8 h-32 animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+            <CardSkeleton /><CardSkeleton /><CardSkeleton />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-5">
+            {[...Array(5)].map((_, i) => <ToolCardSkeleton key={i} />)}
+          </div>
+        </div>
       </div>
     )
   }
@@ -150,12 +159,12 @@ export default function DashboardPage() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Top Navbar */}
       <Navbar user={user} />
 
       {/* Main Content */}
-      <main className="px-4 md:px-6 py-6 md:py-8 pb-16 bg-white min-h-screen">
+      <main className="px-4 md:px-6 py-6 md:py-8 pb-16 bg-white dark:bg-gray-900 min-h-screen">
           {/* Welcome Banner with PCB Circuit Pattern */}
           <div className="mb-8 md:mb-10 bg-gradient-to-br from-[#003d6a] via-[#0066B3] to-[#0077CC] text-white rounded-2xl p-6 md:p-8 shadow-xl relative overflow-hidden">
             {/* PCB Circuit Pattern */}
@@ -207,16 +216,16 @@ export default function DashboardPage() {
           {/* Admin Summary for Super Users */}
           {isSuperUser(user) && adminStats && (
             <div className="mb-8 md:mb-12">
-              <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 md:mb-6 flex items-center space-x-2">
+              <h3 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4 md:mb-6 flex items-center space-x-2">
                 <Shield className="h-5 w-5 md:h-6 md:w-6 text-[#0066B3]" />
                 <span>Admin Overview</span>
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
-                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Total Users</p>
-                      <p className="text-3xl font-bold text-gray-900">{adminStats.totalUsers}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Total Users</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{adminStats.totalUsers}</p>
                     </div>
                     <div className="p-3 bg-gradient-to-br from-[#0066B3] to-[#0077CC] rounded-xl">
                       <Users className="h-6 w-6 text-white" />
@@ -229,11 +238,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Active Users</p>
-                      <p className="text-3xl font-bold text-gray-900">{adminStats.activeUsers}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{adminStats.activeUsers}</p>
                     </div>
                     <div className="p-3 bg-green-500 rounded-xl">
                       <Activity className="h-6 w-6 text-white" />
@@ -246,11 +255,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-500 mb-1">Available Tools</p>
-                      <p className="text-3xl font-bold text-gray-900">{adminStats.totalTools}</p>
+                      <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Available Tools</p>
+                      <p className="text-3xl font-bold text-gray-900 dark:text-white">{adminStats.totalTools}</p>
                     </div>
                     <div className="p-3 bg-gradient-to-br from-[#FF6D00] to-[#FFAB00] rounded-xl">
                       <BarChart3 className="h-6 w-6 text-white" />
@@ -269,7 +278,7 @@ export default function DashboardPage() {
 
           {/* Available Tools */}
           <div className="mb-8 md:mb-12">
-            <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 md:mb-6">Available Tools</h3>
+            <h3 className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-4 md:mb-6">Available Tools</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-5">
               {userTools.map((tool) => {
                 // Map tool names to their respective configurations
@@ -282,11 +291,11 @@ export default function DashboardPage() {
                         href: 'https://bom-tool.vercel.app/',
                         localHref: 'http://acidashboard.aci.local:8081/',
                         ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100',
-                        borderClass: 'border-orange-200 hover:border-orange-300',
+                        bgClass: 'bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 dark:hover:from-orange-950/60 dark:hover:to-amber-950/60',
+                        borderClass: 'border-orange-200 hover:border-orange-300 dark:border-orange-800/50 dark:hover:border-orange-700/60',
                         iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700',
                         icon: ArrowLeftRight,
                         title: 'BOM Tool Suite',
@@ -299,11 +308,11 @@ export default function DashboardPage() {
                         href: 'https://aci-kosh.vercel.app/',
                         localHref: 'http://acidashboard.aci.local:5002/',
                         ssoApp: 'kosh',
-                        bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100',
-                        borderClass: 'border-purple-200 hover:border-purple-300',
+                        bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 dark:from-purple-950/40 dark:to-violet-950/40 dark:hover:from-purple-950/60 dark:hover:to-violet-950/60',
+                        borderClass: 'border-purple-200 hover:border-purple-300 dark:border-purple-800/50 dark:hover:border-purple-700/60',
                         iconBgClass: '',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700',
                         icon: 'custom-kosh',
                         title: 'KOSH',
@@ -315,11 +324,11 @@ export default function DashboardPage() {
                         href: 'http://acidashboard.aci.local:4000/',
                         localHref: 'http://acidashboard.aci.local:4000/',
                         ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100',
-                        borderClass: 'border-teal-200 hover:border-teal-300',
+                        bgClass: 'bg-gradient-to-br from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100 dark:from-teal-950/40 dark:to-cyan-950/40 dark:hover:from-teal-950/60 dark:hover:to-cyan-950/60',
+                        borderClass: 'border-teal-200 hover:border-teal-300 dark:border-teal-800/50 dark:hover:border-teal-700/60',
                         iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700',
                         icon: MessageCircle,
                         title: 'ACI Chat',
@@ -331,11 +340,11 @@ export default function DashboardPage() {
                         href: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
                         localHref: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
                         ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-blue-50 to-sky-50 hover:from-blue-100 hover:to-sky-100',
-                        borderClass: 'border-blue-200 hover:border-blue-300',
+                        bgClass: 'bg-gradient-to-br from-blue-50 to-sky-50 hover:from-blue-100 hover:to-sky-100 dark:from-blue-950/40 dark:to-sky-950/40 dark:hover:from-blue-950/60 dark:hover:to-sky-950/60',
+                        borderClass: 'border-blue-200 hover:border-blue-300 dark:border-blue-800/50 dark:hover:border-blue-700/60',
                         iconBgClass: '',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700',
                         icon: 'custom-suitemaster',
                         title: 'SuiteMaster',
@@ -346,12 +355,12 @@ export default function DashboardPage() {
                         href: 'https://aci-nexus.vercel.app/',
                         localHref: 'http://acidashboard.aci.local:100/',
                         ssoApp: 'nexus',
-                        bgClass: 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100',
-                        borderClass: 'border-blue-200 hover:border-blue-300',
+                        bgClass: 'bg-gradient-to-br from-teal-50 to-emerald-50 hover:from-teal-100 hover:to-emerald-100 dark:from-teal-950/40 dark:to-emerald-950/40 dark:hover:from-teal-950/60 dark:hover:to-emerald-950/60',
+                        borderClass: 'border-teal-200 hover:border-teal-300 dark:border-teal-800/50 dark:hover:border-teal-700/60',
                         iconBgClass: '',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
-                        buttonClass: 'bg-gradient-to-r from-[#0066B3] to-[#0077CC] hover:from-[#004A82] hover:to-[#0066B3]',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
+                        buttonClass: 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700',
                         icon: 'custom-nexus',
                         title: 'NEXUS',
                         description: 'Traveler Management System'
@@ -361,11 +370,11 @@ export default function DashboardPage() {
                         href: '#',
                         localHref: '#',
                         ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100',
-                        borderClass: 'border-gray-200 hover:border-gray-300',
+                        bgClass: 'bg-gradient-to-br from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100 dark:from-gray-800 dark:to-slate-800 dark:hover:from-gray-750 dark:hover:to-slate-750',
+                        borderClass: 'border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600',
                         iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600',
-                        titleClass: 'text-gray-900',
-                        textClass: 'text-gray-600',
+                        titleClass: 'text-gray-900 dark:text-gray-100',
+                        textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-gray-500 to-slate-600 hover:from-gray-600 hover:to-slate-700',
                         icon: Package,
                         title: tool.display_name || tool.name,
@@ -458,9 +467,9 @@ export default function DashboardPage() {
 
               {userTools.length === 0 && (
                 <div className="col-span-full text-center py-12">
-                  <Package className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <p className="text-gray-500 text-lg">No tools assigned to your account.</p>
-                  <p className="text-gray-400 text-sm mt-2">Contact your administrator to get tool access.</p>
+                  <Package className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 text-lg">No tools assigned to your account.</p>
+                  <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Contact your administrator to get tool access.</p>
                 </div>
               )}
             </div>

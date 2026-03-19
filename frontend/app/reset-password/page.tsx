@@ -68,67 +68,27 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      backgroundColor: '#f3f4f6',
-      padding: '16px'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: '500px',
-        padding: '32px',
-        backgroundColor: 'white',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-      }}>
-        <h1 style={{
-          textAlign: 'center',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          marginBottom: '32px',
-          color: '#111827'
-        }}>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+      <div className="w-full max-w-[500px] p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+        <h1 className="text-center text-2xl font-bold mb-8 text-gray-900 dark:text-white">
           RESET PASSWORD
         </h1>
 
         {error && (
-          <div style={{
-            marginBottom: '16px',
-            padding: '12px',
-            backgroundColor: '#fef2f2',
-            color: '#dc2626',
-            borderRadius: '6px',
-            fontSize: '14px'
-          }}>
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-md text-sm border border-red-200 dark:border-red-800">
             {error}
           </div>
         )}
 
         {success && (
-          <div style={{
-            marginBottom: '16px',
-            padding: '12px',
-            backgroundColor: '#f0fdf4',
-            color: '#166534',
-            borderRadius: '6px',
-            fontSize: '14px'
-          }}>
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-md text-sm border border-green-200 dark:border-green-800">
             {success}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
+        <form onSubmit={handleSubmit} className="mb-6">
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Username
             </label>
             <input
@@ -136,208 +96,119 @@ export default function ResetPasswordPage() {
               value={formData.username}
               onChange={(e) => setFormData(prev => ({ ...prev, username: e.target.value }))}
               required
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                fontSize: '16px'
-              }}
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your username"
             />
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Current Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 type={showCurrentPassword ? "text" : "password"}
                 value={formData.currentPassword}
                 onChange={(e) => setFormData(prev => ({ ...prev, currentPassword: e.target.value }))}
                 required
-                style={{
-                  width: '100%',
-                  padding: '12px 40px 12px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '16px'
-                }}
+                className="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your current password"
               />
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#6b7280'
-                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               New Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 type={showNewPassword ? "text" : "password"}
                 value={formData.newPassword}
                 onChange={(e) => handlePasswordChange(e.target.value)}
                 required
-                style={{
-                  width: '100%',
-                  padding: '12px 40px 12px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '16px'
-                }}
+                className="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your new password"
               />
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#6b7280'
-                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            
+
             {/* Password Requirements */}
             {formData.newPassword && (
-              <div style={{ marginTop: '8px', fontSize: '12px' }}>
-                <div style={{ color: formData.newPassword.length >= 8 ? '#16a34a' : '#dc2626' }}>
+              <div className="mt-2 text-xs space-y-0.5">
+                <div className={formData.newPassword.length >= 8 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   At least 8 characters
                 </div>
-                <div style={{ color: /[A-Z]/.test(formData.newPassword) ? '#16a34a' : '#dc2626' }}>
+                <div className={/[A-Z]/.test(formData.newPassword) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   One uppercase letter
                 </div>
-                <div style={{ color: /[a-z]/.test(formData.newPassword) ? '#16a34a' : '#dc2626' }}>
+                <div className={/[a-z]/.test(formData.newPassword) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   One lowercase letter
                 </div>
-                <div style={{ color: /\d/.test(formData.newPassword) ? '#16a34a' : '#dc2626' }}>
+                <div className={/\d/.test(formData.newPassword) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   One number
                 </div>
-                <div style={{ color: /[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword) ? '#16a34a' : '#dc2626' }}>
+                <div className={/[!@#$%^&*(),.?":{}|<>]/.test(formData.newPassword) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
                   One special character
                 </div>
               </div>
             )}
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{
-              display: 'block',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#374151',
-              marginBottom: '8px'
-            }}>
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Confirm New Password
             </label>
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 required
-                style={{
-                  width: '100%',
-                  padding: '12px 40px 12px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '6px',
-                  fontSize: '16px'
-                }}
+                className="w-full p-3 pr-10 border border-gray-300 dark:border-gray-600 rounded-md text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Confirm your new password"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#6b7280'
-                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
             {formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
-              <div style={{ marginTop: '4px', fontSize: '12px', color: '#dc2626' }}>
+              <div className="mt-1 text-xs text-red-600 dark:text-red-400">
                 Passwords do not match
               </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="flex gap-3">
             <button
               type="submit"
               disabled={isLoading || passwordErrors.length > 0 || !formData.username || !formData.currentPassword || !formData.newPassword || !formData.confirmPassword || formData.newPassword !== formData.confirmPassword}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: isLoading || passwordErrors.length > 0 ? '#9ca3af' : '#2563eb',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: isLoading || passwordErrors.length > 0 ? 'not-allowed' : 'pointer'
-              }}
+              className="flex-1 p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 dark:disabled:bg-gray-600 text-white border-none rounded-md text-base font-semibold cursor-pointer disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Resetting...' : 'Reset Password'}
             </button>
-            
+
             <button
               type="button"
               onClick={() => window.location.href = '/login'}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: '#6b7280',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
+              className="flex-1 p-3 bg-gray-500 dark:bg-gray-600 hover:bg-gray-600 dark:hover:bg-gray-500 text-white border-none rounded-md text-base font-semibold cursor-pointer transition-colors"
             >
               Back to Login
             </button>

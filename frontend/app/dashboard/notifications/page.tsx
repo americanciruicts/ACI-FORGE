@@ -6,6 +6,8 @@ import { Bell, CheckCheck, LogIn, UserPlus, Eye, ExternalLink, Filter, Trash2, C
 import { User } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import { NotificationSkeleton } from '@/components/Skeleton'
+import { timeAgo } from '@/lib/date-utils'
 
 interface NotificationData {
   id: number
@@ -130,21 +132,7 @@ export default function NotificationsPage() {
     } catch (err) { console.error('Failed to clear read notifications:', err) }
   }
 
-  const formatTime = (dateStr: string | null) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const mins = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-
-    if (mins < 1) return 'Just now'
-    if (mins < 60) return `${mins}m ago`
-    if (hours < 24) return `${hours}h ago`
-    if (days < 7) return `${days}d ago`
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
+  // Using timeAgo from @/lib/date-utils instead of inline formatTime
 
   // Filter notifications by type and date range
   const filteredNotifications = notifications.filter(n => {
@@ -176,14 +164,14 @@ export default function NotificationsPage() {
     if (n.type === 'login') {
       return (
         <div>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-800 dark:text-gray-200">
             <span className="font-semibold">{msg.full_name || msg.username}</span>
-            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
+            {msg.username && msg.full_name && <span className="text-gray-500 dark:text-gray-400"> ({msg.username})</span>}
             {' '}logged in
           </p>
-          <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
-            {msg.ip_address && <p>IP: <span className="font-medium text-gray-700">{msg.ip_address}</span></p>}
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+            {msg.login_time && <p>Time: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.login_time}</span></p>}
+            {msg.ip_address && <p>IP: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.ip_address}</span></p>}
           </div>
         </div>
       )
@@ -192,13 +180,13 @@ export default function NotificationsPage() {
     if (n.type === 'sso_login') {
       return (
         <div>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-800 dark:text-gray-200">
             <span className="font-semibold">{msg.full_name || msg.username}</span>
-            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
-            {' '}logged into <span className="font-semibold text-amber-700">{msg.target_app}</span> via SSO
+            {msg.username && msg.full_name && <span className="text-gray-500 dark:text-gray-400"> ({msg.username})</span>}
+            {' '}logged into <span className="font-semibold text-amber-700 dark:text-amber-400">{msg.target_app}</span> via SSO
           </p>
-          <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+            {msg.login_time && <p>Time: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.login_time}</span></p>}
           </div>
         </div>
       )
@@ -207,13 +195,13 @@ export default function NotificationsPage() {
     if (n.type === 'nexus_login') {
       return (
         <div>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-800 dark:text-gray-200">
             <span className="font-semibold">{msg.full_name || msg.username}</span>
-            {msg.username && msg.full_name && <span className="text-gray-500"> ({msg.username})</span>}
-            {' '}logged into <span className="font-semibold text-indigo-700">NEXUS</span>
+            {msg.username && msg.full_name && <span className="text-gray-500 dark:text-gray-400"> ({msg.username})</span>}
+            {' '}logged into <span className="font-semibold text-indigo-700 dark:text-indigo-400">NEXUS</span>
           </p>
-          <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            {msg.login_time && <p>Time: <span className="font-medium text-gray-700">{msg.login_time}</span></p>}
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+            {msg.login_time && <p>Time: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.login_time}</span></p>}
           </div>
         </div>
       )
@@ -222,20 +210,20 @@ export default function NotificationsPage() {
     if (n.type === 'user_created') {
       return (
         <div>
-          <p className="text-sm text-gray-800">
+          <p className="text-sm text-gray-800 dark:text-gray-200">
             New user <span className="font-semibold">{msg.full_name || msg.username}</span> created
           </p>
-          <div className="mt-1 text-xs text-gray-500 space-y-0.5">
-            <p>Username: <span className="font-medium text-gray-700">{msg.username}</span></p>
-            <p>Email: <span className="font-medium text-gray-700">{msg.email}</span></p>
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 space-y-0.5">
+            <p>Username: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.username}</span></p>
+            <p>Email: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.email}</span></p>
             {msg.password && (
-              <p>Password: <span className="font-medium text-red-600 bg-red-50 px-1 rounded">{msg.password}</span></p>
+              <p>Password: <span className="font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-1 rounded">{msg.password}</span></p>
             )}
-            {msg.roles && <p>Roles: <span className="font-medium text-gray-700">{Array.isArray(msg.roles) ? msg.roles.join(', ') : msg.roles}</span></p>}
-            {msg.tools && <p>Tools: <span className="font-medium text-gray-700">{Array.isArray(msg.tools) ? msg.tools.join(', ') : msg.tools}</span></p>}
-            {msg.created_by && <p>Created by: <span className="font-medium text-gray-700">{msg.created_by}</span></p>}
+            {msg.roles && <p>Roles: <span className="font-medium text-gray-700 dark:text-gray-300">{Array.isArray(msg.roles) ? msg.roles.join(', ') : msg.roles}</span></p>}
+            {msg.tools && <p>Tools: <span className="font-medium text-gray-700 dark:text-gray-300">{Array.isArray(msg.tools) ? msg.tools.join(', ') : msg.tools}</span></p>}
+            {msg.created_by && <p>Created by: <span className="font-medium text-gray-700 dark:text-gray-300">{msg.created_by}</span></p>}
             {msg.sync_results && (
-              <p>Sync: <span className="font-medium text-gray-700">
+              <p>Sync: <span className="font-medium text-gray-700 dark:text-gray-300">
                 {typeof msg.sync_results === 'object'
                   ? Object.entries(msg.sync_results).map(([k, v]) => `${k}: ${v}`).join(', ')
                   : String(msg.sync_results)}
@@ -249,19 +237,19 @@ export default function NotificationsPage() {
     // Fallback for unknown types
     return (
       <div>
-        <p className="text-sm text-gray-800">{n.title}</p>
-        <pre className="mt-1 text-xs text-gray-500 whitespace-pre-wrap">{JSON.stringify(msg, null, 2)}</pre>
+        <p className="text-sm text-gray-800 dark:text-gray-200">{n.title}</p>
+        <pre className="mt-1 text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap">{JSON.stringify(msg, null, 2)}</pre>
       </div>
     )
   }
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'login': return { bg: 'bg-green-100', icon: <LogIn className="h-5 w-5 text-green-600" /> }
-      case 'sso_login': return { bg: 'bg-amber-100', icon: <ExternalLink className="h-5 w-5 text-amber-600" /> }
-      case 'nexus_login': return { bg: 'bg-indigo-100', icon: <LogIn className="h-5 w-5 text-indigo-600" /> }
-      case 'user_created': return { bg: 'bg-blue-100', icon: <UserPlus className="h-5 w-5 text-blue-600" /> }
-      default: return { bg: 'bg-gray-100', icon: <Bell className="h-5 w-5 text-gray-600" /> }
+      case 'login': return { bg: 'bg-green-100 dark:bg-green-900/40', icon: <LogIn className="h-5 w-5 text-green-600 dark:text-green-400" /> }
+      case 'sso_login': return { bg: 'bg-amber-100 dark:bg-amber-900/40', icon: <ExternalLink className="h-5 w-5 text-amber-600 dark:text-amber-400" /> }
+      case 'nexus_login': return { bg: 'bg-indigo-100 dark:bg-indigo-900/40', icon: <LogIn className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> }
+      case 'user_created': return { bg: 'bg-blue-100 dark:bg-blue-900/40', icon: <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" /> }
+      default: return { bg: 'bg-gray-100 dark:bg-gray-700', icon: <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" /> }
     }
   }
 
@@ -270,16 +258,19 @@ export default function NotificationsPage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0066B3]"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <div className="mb-6"><div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" /><div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></div>
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => <NotificationSkeleton key={i} />)}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-6">
@@ -287,11 +278,11 @@ export default function NotificationsPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Bell className="h-6 w-6 text-[#0066B3]" />
               Notifications
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
               {filteredNotifications.length} total {unreadCount > 0 && `· ${unreadCount} unread`}
             </p>
           </div>
@@ -300,7 +291,7 @@ export default function NotificationsPage() {
             {readCount > 0 && (
               <button
                 onClick={clearAllRead}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-all"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-all"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Clear read</span>
@@ -309,7 +300,7 @@ export default function NotificationsPage() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-[#0066B3] bg-blue-50 hover:bg-blue-100 rounded-lg transition-all"
+                className="flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-[#0066B3] dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-all"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 <span>Mark all read</span>
@@ -322,13 +313,13 @@ export default function NotificationsPage() {
         <div className="flex flex-col gap-3 mb-6">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Read/Unread Filter */}
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5">
               <button
                 onClick={() => setReadFilter('all')}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                   readFilter === 'all'
-                    ? 'bg-white text-[#0066B3] shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-700 text-[#0066B3] shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 All
@@ -337,8 +328,8 @@ export default function NotificationsPage() {
                 onClick={() => setReadFilter('unread')}
                 className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
                   readFilter === 'unread'
-                    ? 'bg-white text-[#0066B3] shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'bg-white dark:bg-gray-700 text-[#0066B3] shadow-sm'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                 }`}
               >
                 Unread
@@ -348,15 +339,15 @@ export default function NotificationsPage() {
             {/* Type Filter */}
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-gray-400" />
-              <div className="flex bg-gray-100 rounded-lg p-0.5 flex-wrap gap-0.5">
+              <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-0.5 flex-wrap gap-0.5">
                 {TYPE_OPTIONS.map(opt => (
                   <button
                     key={opt.value}
                     onClick={() => setTypeFilter(opt.value)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap ${
                       typeFilter === opt.value
-                        ? 'bg-white text-[#0066B3] shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-gray-700 text-[#0066B3] shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
                   >
                     {opt.label}
@@ -373,20 +364,20 @@ export default function NotificationsPage() {
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:border-[#0066B3] focus:ring-1 focus:ring-[#0066B3]/20"
+              className="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2.5 py-1.5 focus:border-[#0066B3] focus:ring-1 focus:ring-[#0066B3]/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               placeholder="From"
             />
-            <span className="text-xs text-gray-400">to</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">to</span>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="text-xs border border-gray-300 rounded-lg px-2.5 py-1.5 focus:border-[#0066B3] focus:ring-1 focus:ring-[#0066B3]/20"
+              className="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2.5 py-1.5 focus:border-[#0066B3] focus:ring-1 focus:ring-[#0066B3]/20 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             />
             {(dateFrom || dateTo) && (
               <button
                 onClick={() => { setDateFrom(''); setDateTo('') }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline"
+                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 underline"
               >
                 Clear dates
               </button>
@@ -395,7 +386,7 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
             {error}
           </div>
         )}
@@ -403,9 +394,9 @@ export default function NotificationsPage() {
         {/* Notifications List */}
         {filteredNotifications.length === 0 ? (
           <div className="text-center py-16">
-            <Bell className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">No notifications found</p>
-            <p className="text-gray-400 text-sm mt-1">
+            <Bell className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-500 dark:text-gray-400 font-medium">No notifications found</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-1">
               {typeFilter !== 'all' || dateFrom || dateTo ? 'Try changing the filters' : 'Login events, SSO logins, and new user creations will appear here'}
             </p>
           </div>
@@ -419,8 +410,8 @@ export default function NotificationsPage() {
                     key={n.id}
                     className={`relative flex items-start space-x-3 p-4 rounded-xl border transition-all duration-200 hover:shadow-md ${
                       n.is_read
-                        ? 'bg-white border-gray-200'
-                        : 'bg-blue-50/50 border-blue-200 shadow-sm'
+                        ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                        : 'bg-blue-50/50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-sm'
                     }`}
                   >
                     {/* Unread dot */}
@@ -440,11 +431,11 @@ export default function NotificationsPage() {
                           {renderNotificationContent(n)}
                         </div>
                         <div className="flex items-center space-x-2 ml-3 flex-shrink-0">
-                          <span className="text-xs text-gray-400">{formatTime(n.created_at)}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{timeAgo(n.created_at)}</span>
                           {!n.is_read && (
                             <button
                               onClick={() => markAsRead(n.id)}
-                              className="p-1 hover:bg-white rounded transition-all"
+                              className="p-1 hover:bg-white dark:hover:bg-gray-700 rounded transition-all"
                               title="Mark as read"
                             >
                               <Eye className="h-3.5 w-3.5 text-gray-400 hover:text-[#0066B3]" />
@@ -462,13 +453,13 @@ export default function NotificationsPage() {
             {totalPages > 1 && (
               <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
                     Showing {startIndex + 1}-{Math.min(startIndex + perPage, filteredNotifications.length)} of {filteredNotifications.length}
                   </span>
                   <select
                     value={perPage}
                     onChange={(e) => { setPerPage(Number(e.target.value)); setCurrentPage(1) }}
-                    className="text-xs border border-gray-300 rounded-lg px-2 py-1"
+                    className="text-xs border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   >
                     <option value={10}>10</option>
                     <option value={20}>20</option>
@@ -480,14 +471,14 @@ export default function NotificationsPage() {
                   <button
                     onClick={() => setCurrentPage(1)}
                     disabled={currentPage === 1}
-                    className="px-2 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     First
                   </button>
                   <button
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="p-1 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-1 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
@@ -497,14 +488,14 @@ export default function NotificationsPage() {
                   <button
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="p-1 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="p-1 text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setCurrentPage(totalPages)}
                     disabled={currentPage === totalPages}
-                    className="px-2 py-1 text-xs font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Last
                   </button>

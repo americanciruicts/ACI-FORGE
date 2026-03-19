@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
+  "/dashboard/maintenance/submit/page": "/dashboard/maintenance/submit",
+  "/dashboard/notifications/page": "/dashboard/notifications",
+  "/dashboard/page": "/dashboard",
+  "/dashboard/profile/page": "/dashboard/profile",
+  "/dashboard/users/page": "/dashboard/users",
+  "/login/page": "/login",
+  "/forgot-password/page": "/forgot-password",
+  "/page": "/",
+  "/reset-password/page": "/reset-password"
+}

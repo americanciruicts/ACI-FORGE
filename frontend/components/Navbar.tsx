@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Image from 'next/image'
-import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X, Bell, LogIn, UserPlus, ExternalLink, CheckCheck } from 'lucide-react'
+import { LogOut, User as UserIcon, Home, Users, ChevronDown, Wrench, Menu, X, Bell, LogIn, UserPlus, ExternalLink, CheckCheck, Sun, Moon } from 'lucide-react'
 import { User, clearUserSession } from '@/lib/auth'
+import { useTheme } from './ThemeProvider'
 
 interface NotificationPreview {
   id: number
@@ -22,6 +23,7 @@ interface NavbarProps {
 export default function Navbar({ user }: NavbarProps) {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, toggleTheme } = useTheme()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -245,6 +247,17 @@ export default function Navbar({ user }: NavbarProps) {
 
         {/* Desktop User Profile Section */}
         <div className="hidden lg:flex items-center space-x-3">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 text-white hover:bg-white/15 rounded-xl transition-all duration-200 active:scale-95"
+            style={{ outline: 'none', userSelect: 'none' }}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label="Toggle dark mode"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+
           {/* Notification Bell with Dropdown */}
           {isSuperAdmin && (
             <div className="relative" data-dropdown>
@@ -272,16 +285,16 @@ export default function Navbar({ user }: NavbarProps) {
 
               {/* Bell Dropdown */}
               {bellDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden" role="menu">
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden" role="menu">
                   {/* Header */}
-                  <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50">
-                    <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-750">
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Notifications</h3>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         markAllAsRead()
                       }}
-                      className="text-xs text-[#0066B3] hover:text-[#004A82] font-semibold flex items-center gap-1 hover:bg-blue-100 px-2 py-1 rounded-md transition-colors"
+                      className="text-xs text-[#0066B3] dark:text-blue-400 hover:text-[#004A82] dark:hover:text-blue-300 font-semibold flex items-center gap-1 hover:bg-blue-100 dark:hover:bg-gray-700 px-2 py-1 rounded-md transition-colors"
                       style={{ outline: 'none' }}
                     >
                       <CheckCheck className="h-3.5 w-3.5" />
@@ -290,15 +303,15 @@ export default function Navbar({ user }: NavbarProps) {
                   </div>
 
                   {/* Notification List */}
-                  <div className="max-h-[320px] overflow-y-auto">
+                  <div className="max-h-[320px] overflow-y-auto dark:bg-gray-800">
                     {loadingNotifications ? (
                       <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#0066B3]"></div>
                       </div>
                     ) : recentNotifications.length === 0 ? (
                       <div className="py-8 text-center">
-                        <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-sm text-gray-400">No notifications</p>
+                        <Bell className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                        <p className="text-sm text-gray-400 dark:text-gray-500">No notifications</p>
                       </div>
                     ) : (
                       recentNotifications.map((notif) => {
@@ -308,10 +321,10 @@ export default function Navbar({ user }: NavbarProps) {
                           return <Bell className="h-4 w-4" />
                         }
                         const getIconColor = () => {
-                          if (notif.type === 'login') return 'bg-blue-100 text-blue-600'
-                          if (notif.type === 'sso_login' || notif.type === 'nexus_login') return 'bg-indigo-100 text-indigo-600'
-                          if (notif.type === 'user_created') return 'bg-green-100 text-green-600'
-                          return 'bg-gray-100 text-gray-600'
+                          if (notif.type === 'login') return 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+                          if (notif.type === 'sso_login' || notif.type === 'nexus_login') return 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
+                          if (notif.type === 'user_created') return 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400'
+                          return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                         }
                         const msg = notif.message || {}
                         const subtitle = msg.username || msg.full_name || msg.email || ''
@@ -320,22 +333,22 @@ export default function Navbar({ user }: NavbarProps) {
                         return (
                           <div
                             key={notif.id}
-                            className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 ${
-                              !notif.is_read ? 'bg-blue-50/50' : ''
+                            className={`w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0 ${
+                              !notif.is_read ? 'bg-blue-50/50 dark:bg-blue-900/20' : ''
                             }`}
                           >
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${getIconColor()}`}>
                               {getIcon()}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-xs truncate ${!notif.is_read ? 'font-bold text-gray-900' : 'font-medium text-gray-700'}`}>
+                              <p className={`text-xs truncate ${!notif.is_read ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-700 dark:text-gray-300'}`}>
                                 {notif.title}
                               </p>
                               {subtitle && (
-                                <p className="text-xs text-gray-500 truncate mt-0.5">{subtitle}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{subtitle}</p>
                               )}
                               {timeAgo && (
-                                <p className="text-[10px] text-gray-400 mt-1">{timeAgo}</p>
+                                <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">{timeAgo}</p>
                               )}
                             </div>
                             {!notif.is_read && (
@@ -348,13 +361,13 @@ export default function Navbar({ user }: NavbarProps) {
                   </div>
 
                   {/* Footer - View All */}
-                  <div className="border-t border-gray-100">
+                  <div className="border-t border-gray-100 dark:border-gray-700">
                     <button
                       onClick={() => {
                         setBellDropdownOpen(false)
                         router.push('/dashboard/notifications')
                       }}
-                      className="w-full px-4 py-3 text-sm font-semibold text-[#0066B3] hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                      className="w-full px-4 py-3 text-sm font-semibold text-[#0066B3] dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
                       style={{ outline: 'none' }}
                     >
                       <span>View all notifications</span>
@@ -410,23 +423,23 @@ export default function Navbar({ user }: NavbarProps) {
 
           {/* User Dropdown Menu */}
           {userDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 overflow-hidden" role="menu">
+            <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 overflow-hidden" role="menu">
               {/* User Header */}
-              <div className="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-cyan-50">
+              <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-750">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-gradient-to-br from-[#0066B3] to-[#0077CC] rounded-full flex items-center justify-center shadow-md">
                     <UserIcon className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-bold text-gray-900 truncate">{user.full_name}</p>
-                    <p className="text-sm text-gray-500 truncate">@{user.username}</p>
+                    <p className="text-base font-bold text-gray-900 dark:text-white truncate">{user.full_name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mt-3">
                   {user.roles?.map((role) => (
                     <span
                       key={role.id}
-                      className="text-xs bg-[#0066B3]/10 text-[#0066B3] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide"
+                      className="text-xs bg-[#0066B3]/10 text-[#0066B3] dark:bg-[#0066B3]/20 dark:text-blue-300 px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide"
                     >
                       {role.name === 'superuser' ? 'Super User' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maintenance' : role.name}
                     </span>
@@ -441,12 +454,12 @@ export default function Navbar({ user }: NavbarProps) {
                     setUserDropdownOpen(false)
                     router.push('/dashboard/profile')
                   }}
-                  className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-[#0066B3] transition-all duration-200 flex items-center space-x-3"
+                  className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-[#0066B3] dark:hover:text-blue-300 transition-all duration-200 flex items-center space-x-3"
                   style={{ outline: 'none', userSelect: 'none' }}
                   role="menuitem"
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <UserIcon className="h-4 w-4 text-gray-600" />
+                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    <UserIcon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   </div>
                   <span>View Profile</span>
                 </button>
@@ -457,12 +470,12 @@ export default function Navbar({ user }: NavbarProps) {
                       setUserDropdownOpen(false)
                       router.push('/dashboard/notifications')
                     }}
-                    className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-all duration-200 flex items-center space-x-3"
+                    className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-amber-50 dark:hover:bg-gray-700 hover:text-amber-600 dark:hover:text-amber-400 transition-all duration-200 flex items-center space-x-3"
                     style={{ outline: 'none', userSelect: 'none' }}
                     role="menuitem"
                   >
-                    <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center relative">
-                      <Bell className="h-4 w-4 text-gray-600" />
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center relative">
+                      <Bell className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       {unreadCount > 0 && (
                         <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center px-0.5">
                           {unreadCount > 9 ? '9+' : unreadCount}
@@ -471,7 +484,7 @@ export default function Navbar({ user }: NavbarProps) {
                     </div>
                     <span>Notifications</span>
                     {unreadCount > 0 && (
-                      <span className="ml-auto bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full">
+                      <span className="ml-auto bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 text-xs font-bold px-2 py-0.5 rounded-full">
                         {unreadCount}
                       </span>
                     )}
@@ -483,12 +496,12 @@ export default function Navbar({ user }: NavbarProps) {
                     setUserDropdownOpen(false)
                     router.push('/reset-password')
                   }}
-                  className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 flex items-center space-x-3"
+                  className="w-full text-left px-5 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-gray-700 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200 flex items-center space-x-3"
                   style={{ outline: 'none', userSelect: 'none' }}
                   role="menuitem"
                 >
-                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <svg className="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    <svg className="h-4 w-4 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                     </svg>
                   </div>
@@ -497,15 +510,15 @@ export default function Navbar({ user }: NavbarProps) {
               </div>
 
               {/* Logout */}
-              <div className="border-t border-gray-100 pt-2 pb-1 px-3">
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-2 pb-1 px-3">
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-3 py-3 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200 flex items-center space-x-3 rounded-lg"
+                  className="w-full text-left px-3 py-3 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 flex items-center space-x-3 rounded-lg"
                   style={{ outline: 'none', userSelect: 'none' }}
                   role="menuitem"
                 >
-                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                    <LogOut className="h-4 w-4 text-red-500" />
+                  <div className="w-8 h-8 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                    <LogOut className="h-4 w-4 text-red-500 dark:text-red-400" />
                   </div>
                   <span>Sign Out</span>
                 </button>
@@ -518,7 +531,7 @@ export default function Navbar({ user }: NavbarProps) {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-200 shadow-lg relative z-10">
+        <div className="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg relative z-10">
           {/* Navigation Links */}
           <div className="px-4 py-3 space-y-1">
             <button
@@ -529,7 +542,7 @@ export default function Navbar({ user }: NavbarProps) {
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-semibold transition-all ${
                 isActive('/dashboard')
                   ? 'bg-gradient-to-r from-[#0066B3] to-[#0077CC] text-white shadow-md'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Home className="h-5 w-5" />
@@ -544,7 +557,7 @@ export default function Navbar({ user }: NavbarProps) {
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-semibold transition-all ${
                 pathname?.startsWith('/dashboard/maintenance')
                   ? 'bg-gradient-to-r from-[#0066B3] to-[#0077CC] text-white shadow-md'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
               }`}
             >
               <Wrench className="h-5 w-5" />
@@ -560,7 +573,7 @@ export default function Navbar({ user }: NavbarProps) {
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-semibold transition-all ${
                   isActive('/dashboard/users')
                     ? 'bg-gradient-to-r from-[#0066B3] to-[#0077CC] text-white shadow-md'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 <Users className="h-5 w-5" />
@@ -570,21 +583,21 @@ export default function Navbar({ user }: NavbarProps) {
           </div>
 
           {/* Mobile User Section */}
-          <div className="px-4 py-3 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-gray-800 dark:to-gray-850">
             <div className="flex items-center space-x-3 mb-3">
               <div className="w-12 h-12 bg-gradient-to-br from-[#0066B3] to-[#0077CC] rounded-full flex items-center justify-center shadow-md">
                 <UserIcon className="h-6 w-6 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-gray-900 truncate">{user.full_name}</p>
-                <p className="text-xs text-gray-500 truncate">@{user.username}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{user.full_name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">@{user.username}</p>
               </div>
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3">
               {user.roles?.map((role) => (
                 <span
                   key={role.id}
-                  className="text-xs bg-[#0066B3]/10 text-[#0066B3] px-2.5 py-1 rounded-full font-semibold uppercase"
+                  className="text-xs bg-[#0066B3]/10 text-[#0066B3] dark:bg-[#0066B3]/20 dark:text-blue-300 px-2.5 py-1 rounded-full font-semibold uppercase"
                 >
                   {role.name === 'superuser' ? 'Super User' : role.name === 'super_admin' ? 'Super Admin' : role.name === 'maintenance' ? 'Maint' : role.name}
                 </span>
@@ -596,7 +609,7 @@ export default function Navbar({ user }: NavbarProps) {
                   setMobileMenuOpen(false)
                   router.push('/dashboard/profile')
                 }}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-white rounded-lg transition-all"
+                className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
               >
                 <UserIcon className="h-4 w-4" />
                 <span>View Profile</span>
@@ -607,7 +620,7 @@ export default function Navbar({ user }: NavbarProps) {
                     setMobileMenuOpen(false)
                     router.push('/dashboard/notifications')
                   }}
-                  className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-white rounded-lg transition-all"
+                  className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-all"
                 >
                   <Bell className="h-4 w-4" />
                   <span>Notifications</span>
@@ -619,11 +632,18 @@ export default function Navbar({ user }: NavbarProps) {
                 </button>
               )}
               <button
+                onClick={toggleTheme}
+                className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 rounded-lg transition-all"
+              >
+                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              </button>
+              <button
                 onClick={() => {
                   setMobileMenuOpen(false)
                   handleLogout()
                 }}
-                className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                className="w-full flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-all"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sign Out</span>
