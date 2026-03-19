@@ -1,17 +1,19 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { loginUser } from '@/lib/auth'
+import { loginUser, generateSSOToken } from '@/lib/auth'
 import { Eye, EyeOff } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     setMounted(true)
@@ -30,6 +32,47 @@ export default function LoginPage() {
       localStorage.setItem('refreshToken', data.refresh_token)
       localStorage.setItem('user', JSON.stringify(data.user))
       localStorage.setItem('lastLogin', new Date().toISOString())
+
+      // Check if this login was triggered by an SSO redirect from another app
+      const redirectApp = searchParams?.get('redirect')
+      if (redirectApp && ['nexus', 'kosh', 'bom'].includes(redirectApp.toLowerCase())) {
+        try {
+          // Detect if we're on local network
+          const isLocal = typeof window !== 'undefined' && (
+            window.location.hostname.includes('.local') ||
+            window.location.hostname.startsWith('192.168.') ||
+            window.location.hostname === 'localhost'
+          )
+          // Use the token we just received directly instead of reading from localStorage
+          const token = data.access_token
+          const API_BASE = process.env.NEXT_PUBLIC_API_URL || ''
+          const ssoResponse = await fetch(`${API_BASE}/api/auth/sso/generate`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ target_app: redirectApp.toLowerCase(), use_local: isLocal }),
+          })
+
+          if (ssoResponse.ok) {
+            const ssoData = await ssoResponse.json()
+            window.location.href = ssoData.redirect_url
+            return
+          } else {
+            const errData = await ssoResponse.json().catch(() => ({ detail: 'Unknown error' }))
+            console.error('SSO generate failed:', errData)
+            setError(`SSO redirect failed: ${errData.detail || 'Unknown error'}. Redirecting to dashboard...`)
+            setTimeout(() => { window.location.href = '/dashboard' }, 2000)
+            return
+          }
+        } catch (ssoErr: any) {
+          console.error('SSO redirect failed:', ssoErr.message)
+          setError(`SSO redirect failed: ${ssoErr.message}. Redirecting to dashboard...`)
+          setTimeout(() => { window.location.href = '/dashboard' }, 2000)
+          return
+        }
+      }
 
       window.location.href = '/dashboard'
     } catch (err: any) {
@@ -685,5 +728,13 @@ export default function LoginPage() {
         }
       `}</style>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0a0f1c' }} />}>
+      <LoginForm />
+    </Suspense>
   )
 }
