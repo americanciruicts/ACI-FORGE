@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Bell, CheckCheck, LogIn, UserPlus, Eye, ExternalLink, Filter, Trash2, ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
-import { User } from '@/lib/auth'
+import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { NotificationSkeleton } from '@/components/Skeleton'
@@ -73,22 +73,17 @@ export default function NotificationsPage() {
   }, [readFilter, router])
 
   useEffect(() => {
-    try {
-      const userData = localStorage.getItem('user')
-      if (userData) {
-        const parsed = JSON.parse(userData)
-        setUser(parsed)
-        const isSuperAdmin = parsed.roles?.some((r: any) => r.name === 'super_admin')
-        if (!isSuperAdmin) {
-          router.push('/dashboard')
-          return
-        }
-      } else {
-        router.push('/login')
-        return
-      }
-    } catch {
-      router.push('/login')
+    const session = validateSession()
+    if (!session.isValid || !session.user) {
+      clearUserSession()
+      router.replace('/login')
+      return
+    }
+
+    setUser(session.user)
+    const isSuperAdmin = session.user.roles?.some((r: any) => r.name === 'super_admin')
+    if (!isSuperAdmin) {
+      router.push('/dashboard')
       return
     }
 

@@ -11,7 +11,7 @@ const SECURITY_CONFIG = {
   TOKEN_EXPIRY_BUFFER: 5 * 60 * 1000, // 5 minutes before expiry
   MAX_LOGIN_ATTEMPTS: 100,
   LOGIN_ATTEMPT_WINDOW: 15 * 60 * 1000, // 15 minutes
-  SESSION_TIMEOUT: 8 * 60 * 60 * 1000, // 8 hours
+  SESSION_TIMEOUT: 9 * 60 * 60 * 1000, // 9 hours
 }
 
 // Security utilities
@@ -382,6 +382,17 @@ export function clearUserSession(): void {
   }
 }
 
+export function getSessionRemainingMs(): number {
+  try {
+    const lastLogin = localStorage.getItem('lastLogin')
+    if (!lastLogin) return 0
+    const elapsed = Date.now() - new Date(lastLogin).getTime()
+    return Math.max(0, SECURITY_CONFIG.SESSION_TIMEOUT - elapsed)
+  } catch {
+    return 0
+  }
+}
+
 export function validateSession(): { isValid: boolean, user: User | null, token: string | null } {
   try {
     const token = localStorage.getItem('accessToken')
@@ -396,9 +407,9 @@ export function validateSession(): { isValid: boolean, user: User | null, token:
     const loginTime = lastLogin ? new Date(lastLogin) : null
     const now = new Date()
 
-    // Check if session is older than 8 hours (token expiry)
-    if (loginTime && (now.getTime() - loginTime.getTime()) > 8 * 60 * 60 * 1000) {
-      console.warn('Session expired after 8 hours')
+    // Check if session is older than 9 hours
+    if (loginTime && (now.getTime() - loginTime.getTime()) > SECURITY_CONFIG.SESSION_TIMEOUT) {
+      console.warn('Session expired after 9 hours')
       clearUserSession()
       return { isValid: false, user: null, token: null }
     }

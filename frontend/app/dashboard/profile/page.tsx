@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User as UserIcon, Mail, Shield, Clock, Wrench } from 'lucide-react'
-import { User, clearUserSession } from '@/lib/auth'
+import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 
@@ -14,27 +14,21 @@ export default function ProfilePage() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    const userData = localStorage.getItem('user')
+    const session = validateSession()
 
-    if (!token || !userData) {
-      router.push('/login')
+    if (!session.isValid || !session.user || !session.token) {
+      clearUserSession()
+      router.replace('/login')
       return
     }
 
-    try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-      const storedLogin = localStorage.getItem('lastLogin')
-      if (storedLogin) {
-        setLastLogin(new Date(storedLogin).toLocaleString('en-US', {
+    setUser(session.user)
+    const storedLogin = localStorage.getItem('lastLogin')
+    if (storedLogin) {
+      setLastLogin(new Date(storedLogin).toLocaleString('en-US', {
           month: 'short', day: 'numeric', year: 'numeric',
           hour: 'numeric', minute: '2-digit', hour12: true
         }))
-      }
-    } catch (err) {
-      clearUserSession()
-      router.push('/login')
     }
 
     setIsLoading(false)

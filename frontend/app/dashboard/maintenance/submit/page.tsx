@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Wrench } from 'lucide-react'
-import { User, clearUserSession } from '@/lib/auth'
+import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 
@@ -13,21 +13,15 @@ export default function SubmitMaintenancePage() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    const userData = localStorage.getItem('user')
+    const session = validateSession()
 
-    if (!token || !userData) {
-      router.push('/login')
+    if (!session.isValid || !session.user || !session.token) {
+      clearUserSession()
+      router.replace('/login')
       return
     }
 
-    try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
-    } catch (err) {
-      clearUserSession()
-      router.push('/login')
-    }
+    setUser(session.user)
 
     setIsLoading(false)
   }, [router])

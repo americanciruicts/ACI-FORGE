@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Edit, Search, Trash2, Key, Eye, EyeOff, User as UserIcon, X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { User, clearUserSession } from '@/lib/auth'
+import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { useToast } from '@/components/Toast'
@@ -94,30 +94,22 @@ export default function UserManagementPage() {
 
   useEffect(() => {
     const initializePage = async () => {
-      const token = localStorage.getItem('accessToken')
-      const userData = localStorage.getItem('user')
+      const session = validateSession()
 
-      if (!token) {
-        router.push('/login')
+      if (!session.isValid || !session.user || !session.token) {
+        clearUserSession()
+        router.replace('/login')
         return
       }
 
-      if (userData) {
-        try {
-          const parsedUser = JSON.parse(userData)
-          setCurrentUser(parsedUser)
-          
-          // Check if user is superuser only
-          const hasUserManagementAccess = parsedUser.roles?.some((role: any) => role.name === 'superuser')
-          if (!hasUserManagementAccess) {
-            router.push('/dashboard')
-            return
-          }
-        } catch {
-          clearUserSession()
-          router.push('/login')
-          return
-        }
+      const parsedUser = session.user
+      setCurrentUser(parsedUser)
+
+      // Check if user is superuser only
+      const hasUserManagementAccess = parsedUser.roles?.some((role: any) => role.name === 'superuser')
+      if (!hasUserManagementAccess) {
+        router.push('/dashboard')
+        return
       }
 
       await loadData()

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, MessageCircle, WifiOff } from 'lucide-react'
-import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken } from '@/lib/auth'
+import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken, validateSession, getSessionRemainingMs } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
 import { CardSkeleton, ToolCardSkeleton } from '@/components/Skeleton'
@@ -45,30 +45,47 @@ export default function DashboardPage() {
   })()
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    const userData = localStorage.getItem('user')
+    const session = validateSession()
 
-    if (!token || !userData) {
-      router.push('/login')
+    if (!session.isValid || !session.user || !session.token) {
+      clearUserSession()
+      router.replace('/login')
       return
     }
 
-    try {
-      const parsedUser = JSON.parse(userData)
-      setUser(parsedUser)
+    setUser(session.user)
 
-      // Skip token validation for now - just set the user and fetch admin stats if needed
-      if (isSuperUser(parsedUser)) {
-        fetchAdminStats(token)
-      }
-    } catch (err) {
-      console.error('Error parsing user data:', err)
-      clearUserSession()
-      router.push('/login')
+    if (isSuperUser(session.user)) {
+      fetchAdminStats(session.token)
     }
 
     setIsLoading(false)
   }, [router])
+
+  // Periodic session expiry check - auto-redirect to login when 9-hour session expires
+  useEffect(() => {
+    const remainingMs = getSessionRemainingMs()
+    if (remainingMs <= 0) return
+
+    // Set a timer to redirect when session expires
+    const expiryTimer = setTimeout(() => {
+      clearUserSession()
+      window.location.href = '/login'
+    }, remainingMs)
+
+    // Also check every 60 seconds in case of clock drift
+    const intervalCheck = setInterval(() => {
+      if (getSessionRemainingMs() <= 0) {
+        clearUserSession()
+        window.location.href = '/login'
+      }
+    }, 60000)
+
+    return () => {
+      clearTimeout(expiryTimer)
+      clearInterval(intervalCheck)
+    }
+  }, [user])
 
   const fetchAdminStats = async (token: string) => {
     try {
