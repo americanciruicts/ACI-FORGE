@@ -566,6 +566,15 @@ async def get_all_tools(
     tools = db.query(Tool).all()
     return [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in tools]
 
+@app.get("/api/tools/admin/all", response_model=List[ToolResponse])
+async def get_all_tools_admin(
+    current_user: User = Depends(require_role("superuser")),
+    db: Session = Depends(get_db)
+):
+    """Get all tools (SuperUser only) - used by user management page"""
+    tools = db.query(Tool).all()
+    return [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in tools]
+
 class UserRegister(BaseModel):
     full_name: str
     username: str
