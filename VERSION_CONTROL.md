@@ -80,6 +80,10 @@ All changes should be documented in this file following this format:
 - **Self-hosted**: Docker Compose on local server with Cloudflare Tunnel
 - **Vercel**: Frontend + serverless API functions
 
+### Owner
+- **Organization**: American Circuits Inc.
+- **Deployed & Maintained by**: Preet Raval
+
 ### Notes
 - Always update this document when making version changes
 - Maintain backward compatibility when possible

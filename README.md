@@ -97,6 +97,12 @@ Copy the example env files and configure:
 
 **v6.0.0** — See [VERSION_CONTROL.md](VERSION_CONTROL.md) for full release history.
 
+## Owner
+
+**American Circuits Inc.**
+
+Deployed and maintained by **Preet Raval**
+
 ## License
 
 Proprietary — American Circuits Inc. Internal use only.
