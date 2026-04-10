@@ -69,8 +69,8 @@ export default function SubmitMaintenancePage() {
           <iframe
             src={MAINTENANCE_FORM_SRC}
             width="100%"
-            height="600"
-            style={{ border: 'none', minHeight: '600px', display: 'block' }}
+            height="700"
+            style={{ border: 'none', minHeight: '700px', display: 'block' }}
             title="Maintenance Request Form"
           />
         </div>
