@@ -15,8 +15,11 @@ const nextConfig = {
             value: 'nosniff',
           },
           {
+            // SAMEORIGIN instead of DENY so the maintenance page can embed
+            // the reverse-proxied lmhosted form iframe (same-origin path).
+            // External sites still cannot frame FORGE.
             key: 'X-Frame-Options',
-            value: 'DENY',
+            value: 'SAMEORIGIN',
           },
           {
             key: 'X-XSS-Protection',
