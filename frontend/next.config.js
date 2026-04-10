@@ -54,6 +54,25 @@ const nextConfig = {
         source: '/health',
         destination: 'http://localhost:2003/health',
       },
+      // Reverse-proxy the lmhosted Odoo formio service so the embedded
+      // maintenance form is served same-origin. This avoids cross-origin
+      // cookie/session blocking that was causing silent submission failures.
+      {
+        source: '/formsm/:path*',
+        destination: 'https://aci.lmhosted.com/formsm/:path*',
+      },
+      {
+        source: '/formio/:path*',
+        destination: 'https://aci.lmhosted.com/formio/:path*',
+      },
+      {
+        source: '/web/:path*',
+        destination: 'https://aci.lmhosted.com/web/:path*',
+      },
+      {
+        source: '/longpolling/:path*',
+        destination: 'https://aci.lmhosted.com/longpolling/:path*',
+      },
     ]
   },
   // Security: Disable powered-by header
