@@ -79,7 +79,7 @@ async def generate_sso_token(
             detail=f"You do not have access to {target_app}"
         )
 
-    # Generate SSO JWT token
+    # Generate SSO JWT token — long-lived so users never hit expiry during redirect
     expire = datetime.now(timezone.utc) + timedelta(seconds=settings.SSO_TOKEN_EXPIRE_SECONDS)
     payload = {
         "sub": current_user.username,

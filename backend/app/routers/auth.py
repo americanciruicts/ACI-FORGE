@@ -28,8 +28,8 @@ security = HTTPBearer()
 # In-memory rate limiter for login attempts
 _login_attempts: Dict[str, list] = defaultdict(list)
 _rate_limit_lock = threading.Lock()
-LOGIN_RATE_LIMIT = 5  # max failed attempts
-LOGIN_RATE_WINDOW = 15 * 60  # 15 minutes in seconds
+LOGIN_RATE_LIMIT = 50  # max failed attempts per day
+LOGIN_RATE_WINDOW = 24 * 60 * 60  # 24 hours in seconds
 
 
 def _check_rate_limit(ip: str) -> None:

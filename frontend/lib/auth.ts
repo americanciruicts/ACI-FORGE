@@ -9,9 +9,9 @@ const API_BASE_URL = getApiBaseUrl()
 // Security configuration for ACI Standards compliance
 const SECURITY_CONFIG = {
   TOKEN_EXPIRY_BUFFER: 5 * 60 * 1000, // 5 minutes before expiry
-  MAX_LOGIN_ATTEMPTS: 100,
-  LOGIN_ATTEMPT_WINDOW: 15 * 60 * 1000, // 15 minutes
-  SESSION_TIMEOUT: 9 * 60 * 60 * 1000, // 9 hours
+  MAX_LOGIN_ATTEMPTS: 50, // 50 attempts per day
+  LOGIN_ATTEMPT_WINDOW: 24 * 60 * 60 * 1000, // 24 hours
+  SESSION_TIMEOUT: 14 * 60 * 60 * 1000, // 14 hours per session
 }
 
 // Security utilities
@@ -86,7 +86,7 @@ export interface User {
 
 export interface LoginResponse {
   access_token: string
-  refresh_token: string
+  refresh_token?: string
   token_type: string
   user: User
 }
@@ -111,35 +111,67 @@ export interface UserUpdate {
 }
 
 export async function loginUser(username: string, password: string): Promise<LoginResponse> {
-  // Create an AbortController for timeout
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+  // Clear any stale session data before login attempt
+  clearUserSession()
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, password }),
-      signal: controller.signal,
-    })
+  const maxRetries = 2
+  let lastError: Error | null = null
 
-    clearTimeout(timeoutId)
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout for Vercel cold starts
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ detail: 'Login failed' }))
-      throw new Error(error.detail || 'Invalid username or password')
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+        signal: controller.signal,
+      })
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ detail: 'Login failed' }))
+        // Don't retry on auth errors (wrong password) - only on server errors
+        if (response.status === 401 || response.status === 403 || response.status === 429) {
+          throw new Error(error.detail || 'Invalid username or password')
+        }
+        lastError = new Error(error.detail || 'Login failed')
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 2000))
+          continue
+        }
+        throw lastError
+      }
+
+      return response.json()
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      if (error.name === 'AbortError') {
+        lastError = new Error('Connection timeout. Server may be starting up, retrying...')
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 2000))
+          continue
+        }
+        throw new Error('Connection timeout. Please try again in a few seconds.')
+      }
+      // Don't retry auth errors
+      if (error.message?.includes('Invalid username') || error.message?.includes('Too many')) {
+        throw error
+      }
+      lastError = error
+      if (attempt < maxRetries) {
+        await new Promise(r => setTimeout(r, 2000))
+        continue
+      }
+      throw new Error(error.message || 'Failed to connect to server. Please try again.')
     }
-
-    return response.json()
-  } catch (error: any) {
-    clearTimeout(timeoutId)
-    if (error.name === 'AbortError') {
-      throw new Error('Connection timeout. Please check if the backend server is running on localhost:2003')
-    }
-    throw new Error(error.message || 'Failed to connect to server. Please check your connection.')
   }
+
+  throw lastError || new Error('Login failed after multiple attempts')
 }
 
 export async function getCurrentUser(token: string): Promise<User> {
@@ -280,40 +312,20 @@ export function validatePasswordStrength(password: string): { isValid: boolean; 
 
 export async function resetPasswordWithCurrentPassword(username: string, currentPassword: string, newPassword: string): Promise<{message: string}> {
   try {
-    // First authenticate the user to get their token
-    const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         username: username,
-        password: currentPassword
+        current_password: currentPassword,
+        new_password: newPassword,
       }),
     })
 
-    if (!loginResponse.ok) {
-      throw new Error('Invalid username or current password')
-    }
-
-    const loginData = await loginResponse.json()
-    const token = loginData.access_token
-    const userId = loginData.user.id
-
-    // Now update the user's password
-    const updateResponse = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        password: newPassword
-      }),
-    })
-
-    if (!updateResponse.ok) {
-      const error = await updateResponse.json()
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ detail: 'Failed to reset password' }))
       throw new Error(error.detail || 'Failed to reset password')
     }
 
@@ -409,7 +421,7 @@ export function validateSession(): { isValid: boolean, user: User | null, token:
 
     // Check if session is older than 9 hours
     if (loginTime && (now.getTime() - loginTime.getTime()) > SECURITY_CONFIG.SESSION_TIMEOUT) {
-      console.warn('Session expired after 9 hours')
+      console.warn('Session expired after 14 hours')
       clearUserSession()
       return { isValid: false, user: null, token: null }
     }

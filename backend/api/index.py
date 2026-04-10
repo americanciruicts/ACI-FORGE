@@ -47,7 +47,7 @@ USER_CREDENTIALS = {
 
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 480  # 8 hours
+ACCESS_TOKEN_EXPIRE_MINUTES = 840  # 14 hours
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -148,6 +148,7 @@ class UserResponse(BaseModel):
 
 class Token(BaseModel):
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str
     user: UserResponse
 
@@ -285,6 +286,25 @@ async def health_check(db: Session = Depends(get_db)):
             }
         )
 
+class ResetPasswordRequest(BaseModel):
+    username: str
+    current_password: str
+    new_password: str
+
+@app.post("/api/auth/reset-password")
+async def reset_password(request_data: ResetPasswordRequest, db: Session = Depends(get_db)):
+    """Reset password with current password verification"""
+    user = authenticate_user(db, request_data.username, request_data.current_password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or current password")
+    # Validate new password strength
+    pw = request_data.new_password
+    if len(pw) < 8 or not re.search(r'[A-Z]', pw) or not re.search(r'[a-z]', pw) or not re.search(r'\d', pw) or not re.search(r'[!@#$%^&*(),.?":{}|<>]', pw):
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters with uppercase, lowercase, number, and special character")
+    user.password_hash = get_password_hash(request_data.new_password)
+    db.commit()
+    return {"message": "Password reset successfully"}
+
 @app.post("/api/auth/login", response_model=Token)
 async def login(user_login: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = authenticate_user(db, user_login.username, user_login.password)
@@ -326,8 +346,15 @@ async def login(user_login: UserLogin, request: Request, db: Session = Depends(g
     else:
         tools_response = [ToolResponse(id=tool.id, name=tool.name, display_name=tool.display_name, description=tool.description, route=tool.route, icon=tool.icon, is_active=tool.is_active) for tool in user.tools if tool.is_active]
 
+    # Create refresh token (same expiry as access token for 14h session)
+    refresh_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token = create_access_token(
+        data={"sub": user.username, "type": "refresh"}, expires_delta=refresh_token_expires
+    )
+
     return {
         "access_token": access_token,
+        "refresh_token": refresh_token,
         "token_type": "bearer",
         "user": UserResponse(
             id=user.id,
@@ -1057,7 +1084,7 @@ async def webhook_login(
 # SSO (Single Sign-On) endpoints
 # ---------------------------------------------------------------------------
 SSO_SECRET_KEY = os.getenv("SSO_SECRET_KEY", "D4T_WY71xsF0_UB4QjIzlAjVlj-M5kEG0jsIws6isvPn5NNK4s5-_E_--WI6C6YT6jkerJ3EHncBEuG3tK5Rlg")
-SSO_TOKEN_EXPIRE_SECONDS = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "60"))
+SSO_TOKEN_EXPIRE_SECONDS = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "86400"))
 
 # Map tool names in FORGE DB to target app identifiers
 TOOL_TO_APP_MAP = {

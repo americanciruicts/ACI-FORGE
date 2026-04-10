@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { loginUser, generateSSOToken } from '@/lib/auth'
+import { loginUser, generateSSOToken, resetPasswordWithCurrentPassword, validatePasswordStrength } from '@/lib/auth'
 import { Eye, EyeOff } from 'lucide-react'
 
 function LoginForm() {
@@ -13,11 +13,57 @@ function LoginForm() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [showResetModal, setShowResetModal] = useState(false)
+  const [resetForm, setResetForm] = useState({ username: '', currentPassword: '', newPassword: '', confirmPassword: '' })
+  const [resetError, setResetError] = useState('')
+  const [resetSuccess, setResetSuccess] = useState('')
+  const [resetLoading, setResetLoading] = useState(false)
+  const [showResetCurrentPw, setShowResetCurrentPw] = useState(false)
+  const [showResetNewPw, setShowResetNewPw] = useState(false)
+  const [showResetConfirmPw, setShowResetConfirmPw] = useState(false)
   const searchParams = useSearchParams()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const passwordValidation = validatePasswordStrength(resetForm.newPassword)
+  const passwordsMatch = resetForm.newPassword === resetForm.confirmPassword && resetForm.confirmPassword.length > 0
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResetError('')
+    setResetSuccess('')
+
+    if (!resetForm.username || !resetForm.currentPassword || !resetForm.newPassword || !resetForm.confirmPassword) {
+      setResetError('All fields are required')
+      return
+    }
+    if (!passwordValidation.isValid) {
+      setResetError(passwordValidation.errors[0])
+      return
+    }
+    if (resetForm.newPassword !== resetForm.confirmPassword) {
+      setResetError('New passwords do not match')
+      return
+    }
+    if (resetForm.newPassword === resetForm.currentPassword) {
+      setResetError('New password must be different from current password')
+      return
+    }
+
+    setResetLoading(true)
+    try {
+      await resetPasswordWithCurrentPassword(resetForm.username, resetForm.currentPassword, resetForm.newPassword)
+      setResetSuccess('Password reset successfully! You can now login with your new password.')
+      setResetForm({ username: '', currentPassword: '', newPassword: '', confirmPassword: '' })
+      setTimeout(() => { setShowResetModal(false); setResetSuccess('') }, 3000)
+    } catch (err: any) {
+      setResetError(err.message || 'Failed to reset password')
+    } finally {
+      setResetLoading(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,9 +73,11 @@ function LoginForm() {
     try {
       const data = await loginUser(username, password)
 
-      // Store both access token and refresh token
+      // Store tokens and session data
       localStorage.setItem('accessToken', data.access_token)
-      localStorage.setItem('refreshToken', data.refresh_token)
+      if (data.refresh_token) {
+        localStorage.setItem('refreshToken', data.refresh_token)
+      }
       localStorage.setItem('user', JSON.stringify(data.user))
       localStorage.setItem('lastLogin', new Date().toISOString())
 
@@ -225,11 +273,113 @@ function LoginForm() {
 
         {/* Footer */}
         <div className="card-footer">
-          <button type="button" className="forgot-password">
-            Forgot Password?
+          <button type="button" className="forgot-password" onClick={() => { setShowResetModal(true); setResetError(''); setResetSuccess('') }}>
+            Reset Password
           </button>
         </div>
       </div>
+
+      {/* Reset Password Modal */}
+      {showResetModal && (
+        <div className="reset-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowResetModal(false) }}>
+          <div className="reset-modal">
+            <div className="reset-header">
+              <h3>Reset Password</h3>
+              <button onClick={() => setShowResetModal(false)} className="reset-close">&times;</button>
+            </div>
+
+            {resetSuccess && (
+              <div className="reset-success">{resetSuccess}</div>
+            )}
+            {resetError && (
+              <div className="reset-error">{resetError}</div>
+            )}
+
+            <form onSubmit={handleResetPassword} className="reset-form">
+              <div className="reset-field">
+                <label>Username</label>
+                <input
+                  type="text"
+                  value={resetForm.username}
+                  onChange={(e) => setResetForm({ ...resetForm, username: e.target.value })}
+                  placeholder="Enter your username"
+                  autoComplete="username"
+                />
+              </div>
+
+              <div className="reset-field">
+                <label>Current Password</label>
+                <div className="reset-input-wrapper">
+                  <input
+                    type={showResetCurrentPw ? "text" : "password"}
+                    value={resetForm.currentPassword}
+                    onChange={(e) => setResetForm({ ...resetForm, currentPassword: e.target.value })}
+                    placeholder="Enter current password"
+                    autoComplete="current-password"
+                  />
+                  <button type="button" onClick={() => setShowResetCurrentPw(!showResetCurrentPw)} className="pw-toggle">
+                    {showResetCurrentPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="reset-field">
+                <label>New Password</label>
+                <div className="reset-input-wrapper">
+                  <input
+                    type={showResetNewPw ? "text" : "password"}
+                    value={resetForm.newPassword}
+                    onChange={(e) => setResetForm({ ...resetForm, newPassword: e.target.value })}
+                    placeholder="Enter new password"
+                    autoComplete="new-password"
+                  />
+                  <button type="button" onClick={() => setShowResetNewPw(!showResetNewPw)} className="pw-toggle">
+                    {showResetNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {resetForm.newPassword && (
+                  <div className="pw-rules">
+                    <div className={resetForm.newPassword.length >= 8 ? 'rule-pass' : 'rule-fail'}>8+ characters</div>
+                    <div className={/[A-Z]/.test(resetForm.newPassword) ? 'rule-pass' : 'rule-fail'}>Uppercase letter</div>
+                    <div className={/[a-z]/.test(resetForm.newPassword) ? 'rule-pass' : 'rule-fail'}>Lowercase letter</div>
+                    <div className={/\d/.test(resetForm.newPassword) ? 'rule-pass' : 'rule-fail'}>Number</div>
+                    <div className={/[!@#$%^&*(),.?":{}|<>]/.test(resetForm.newPassword) ? 'rule-pass' : 'rule-fail'}>Special character</div>
+                  </div>
+                )}
+              </div>
+
+              <div className="reset-field">
+                <label>Confirm New Password</label>
+                <div className="reset-input-wrapper">
+                  <input
+                    type={showResetConfirmPw ? "text" : "password"}
+                    value={resetForm.confirmPassword}
+                    onChange={(e) => setResetForm({ ...resetForm, confirmPassword: e.target.value })}
+                    placeholder="Confirm new password"
+                    autoComplete="new-password"
+                  />
+                  <button type="button" onClick={() => setShowResetConfirmPw(!showResetConfirmPw)} className="pw-toggle">
+                    {showResetConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {resetForm.confirmPassword && (
+                  <div className={passwordsMatch ? 'match-pass' : 'match-fail'}>
+                    {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={resetLoading || !passwordValidation.isValid || !passwordsMatch || !resetForm.username || !resetForm.currentPassword}
+                className="reset-submit"
+              >
+                {resetLoading ? 'Resetting...' : 'Reset Password'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         .login-container {
@@ -580,6 +730,159 @@ function LoginForm() {
         .forgot-password:hover {
           color: #004A82;
           background: rgba(0, 102, 179, 0.08);
+        }
+
+        /* Reset Password Modal */
+        .reset-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(4px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 100;
+          padding: 20px;
+        }
+        .reset-modal {
+          background: white;
+          border-radius: 20px;
+          padding: 32px;
+          width: 100%;
+          max-width: 420px;
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .reset-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+        }
+        .reset-header h3 {
+          font-size: 20px;
+          font-weight: 700;
+          color: #1a202c;
+          margin: 0;
+        }
+        .reset-close {
+          background: none;
+          border: none;
+          font-size: 28px;
+          color: #9ca3af;
+          cursor: pointer;
+          line-height: 1;
+          padding: 0 4px;
+        }
+        .reset-close:hover { color: #374151; }
+        .reset-form {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+        .reset-field label {
+          display: block;
+          font-size: 13px;
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 6px;
+        }
+        .reset-field input {
+          width: 100%;
+          padding: 12px 14px;
+          background: #f8fafc;
+          border: 2px solid #e2e8f0;
+          border-radius: 10px;
+          font-size: 14px;
+          color: #1a202c;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .reset-field input:focus {
+          border-color: #0066B3;
+          background: white;
+          box-shadow: 0 0 0 3px rgba(0,102,179,0.1);
+        }
+        .reset-input-wrapper {
+          position: relative;
+        }
+        .reset-input-wrapper input {
+          padding-right: 40px;
+        }
+        .pw-toggle {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          background: none;
+          border: none;
+          color: #9ca3af;
+          cursor: pointer;
+          padding: 2px;
+        }
+        .pw-toggle:hover { color: #0066B3; }
+        .pw-rules {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-top: 8px;
+        }
+        .rule-pass, .rule-fail {
+          font-size: 11px;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-weight: 500;
+        }
+        .rule-pass { background: #ecfdf5; color: #059669; }
+        .rule-fail { background: #fef2f2; color: #dc2626; }
+        .match-pass, .match-fail {
+          font-size: 12px;
+          margin-top: 6px;
+          font-weight: 500;
+        }
+        .match-pass { color: #059669; }
+        .match-fail { color: #dc2626; }
+        .reset-submit {
+          width: 100%;
+          padding: 14px;
+          background: linear-gradient(135deg, #0077CC, #004A82);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-size: 15px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin-top: 4px;
+        }
+        .reset-submit:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0,102,179,0.4);
+        }
+        .reset-submit:disabled {
+          background: #94a3b8;
+          cursor: not-allowed;
+        }
+        .reset-error {
+          background: #fef2f2;
+          color: #dc2626;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          border: 1px solid rgba(220,38,38,0.2);
+          margin-bottom: 8px;
+        }
+        .reset-success {
+          background: #ecfdf5;
+          color: #059669;
+          padding: 10px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          border: 1px solid rgba(5,150,105,0.2);
+          margin-bottom: 8px;
         }
 
         /* Responsive */

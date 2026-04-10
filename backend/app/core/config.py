@@ -32,7 +32,7 @@ class Settings(BaseSettings):
 
     # SSO Configuration
     SSO_SECRET_KEY: str = os.getenv("SSO_SECRET_KEY", "")
-    SSO_TOKEN_EXPIRE_SECONDS: int = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "60"))
+    SSO_TOKEN_EXPIRE_SECONDS: int = int(os.getenv("SSO_TOKEN_EXPIRE_SECONDS", "86400"))
 
     # Cross-app database URLs (for user sync to NEXUS and KOSH)
     NEXUS_DATABASE_URL: str = os.getenv("NEXUS_DATABASE_URL", "postgresql://nexus_user:postgres@aci-database:5432/nexus")

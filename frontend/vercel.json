@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://forge-api-two.vercel.app/api/:path*"
+      "destination": "https://qualifying-affects-amendments-skins.trycloudflare.com/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://forge-api-two.vercel.app/health"
+      "destination": "https://qualifying-affects-amendments-skins.trycloudflare.com/health"
     }
   ]
 }
