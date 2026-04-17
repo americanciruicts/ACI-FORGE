@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, MessageCircle, WifiOff } from 'lucide-react'
+import { Shield, Activity, BarChart3, Users, ArrowLeftRight, Package, WifiOff } from 'lucide-react'
 import { User, isSuperUser, getAllUsers, clearUserSession, generateSSOToken, validateSession, getSessionRemainingMs } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 import Image from 'next/image'
@@ -33,9 +33,8 @@ export default function DashboardPage() {
         const n = safeToolName(tool)
         if (n.includes('bom')) return 0
         if (n.includes('inventory') || n.includes('kosh')) return 1
-        if (n.includes('chat')) return 2
-        if (n.includes('suitemaster') || n.includes('suite')) return 3
-        if (n.includes('nexus')) return 4
+        if (n.includes('suitemaster') || n.includes('suite')) return 2
+        if (n.includes('nexus')) return 3
         return 999
       }
       return [...tools].sort((a, b) => getOrderIndex(a) - getOrderIndex(b))
@@ -335,22 +334,6 @@ export default function DashboardPage() {
                         title: 'KOSH',
                         description: 'Inventory management system'
                       }
-                    case 'aci_chat':
-                    case 'aci chat':
-                      return {
-                        href: 'http://acidashboard.aci.local:4000/',
-                        localHref: 'http://acidashboard.aci.local:4000/',
-                        ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-teal-50 to-cyan-50 hover:from-teal-100 hover:to-cyan-100 dark:from-teal-950/40 dark:to-cyan-950/40 dark:hover:from-teal-950/60 dark:hover:to-cyan-950/60',
-                        borderClass: 'border-teal-200 hover:border-teal-300 dark:border-teal-800/50 dark:hover:border-teal-700/60',
-                        iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600',
-                        titleClass: 'text-gray-900 dark:text-gray-100',
-                        textClass: 'text-gray-600 dark:text-gray-400',
-                        buttonClass: 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700',
-                        icon: MessageCircle,
-                        title: 'ACI Chat',
-                        description: 'AI-powered chat using OLLAMA (Local LLM)'
-                      }
                     case 'suitemaster':
                     case 'suite master':
                       return {
@@ -406,33 +389,48 @@ export default function DashboardPage() {
                 const handleToolLaunch = async (e: React.MouseEvent) => {
                   e.preventDefault()
 
-                  // SSO for both local and remote - generate token with appropriate URLs
-                  if (config.ssoApp) {
-                    try {
-                      if (isLocalNetwork) {
-                        // Local SSO: call local backend directly
-                        const token = localStorage.getItem('accessToken')
-                        if (!token) throw new Error('Not authenticated')
-                        const resp = await fetch(`${LOCAL_API_URL}/api/auth/sso/generate`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                          body: JSON.stringify({ target_app: config.ssoApp, use_local: true }),
-                        })
-                        if (!resp.ok) throw new Error('Local SSO failed')
-                        const data = await resp.json()
-                        window.open(data.redirect_url, '_blank', 'noopener,noreferrer')
-                      } else {
-                        // Remote SSO: call Vercel backend via rewrite
-                        const ssoData = await generateSSOToken(config.ssoApp)
-                        window.open(ssoData.redirect_url, '_blank', 'noopener,noreferrer')
-                      }
-                    } catch (err: any) {
-                      console.error('SSO failed, opening directly:', err.message)
-                      window.open(isLocalNetwork ? config.localHref : config.href, '_blank', 'noopener,noreferrer')
+                  const fallbackHref = isLocalNetwork ? config.localHref : config.href
+
+                  if (!config.ssoApp) {
+                    window.open(fallbackHref, '_blank', 'noopener,noreferrer')
+                    return
+                  }
+
+                  // Open the window synchronously during the click to preserve the
+                  // user-gesture chain. Mobile browsers (iOS Safari, Android Chrome)
+                  // block window.open called after an await.
+                  const win = window.open('about:blank', '_blank', 'noopener,noreferrer')
+
+                  try {
+                    let redirectUrl: string
+                    if (isLocalNetwork) {
+                      const token = localStorage.getItem('accessToken')
+                      if (!token) throw new Error('Not authenticated')
+                      const resp = await fetch(`${LOCAL_API_URL}/api/auth/sso/generate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ target_app: config.ssoApp, use_local: true }),
+                      })
+                      if (!resp.ok) throw new Error('Local SSO failed')
+                      const data = await resp.json()
+                      redirectUrl = data.redirect_url
+                    } else {
+                      const ssoData = await generateSSOToken(config.ssoApp)
+                      redirectUrl = ssoData.redirect_url
                     }
-                  } else {
-                    // No SSO - open directly
-                    window.open(isLocalNetwork ? config.localHref : config.href, '_blank', 'noopener,noreferrer')
+
+                    if (win && !win.closed) {
+                      win.location.href = redirectUrl
+                    } else {
+                      window.location.href = redirectUrl
+                    }
+                  } catch (err: any) {
+                    console.error('SSO failed, opening directly:', err.message)
+                    if (win && !win.closed) {
+                      win.location.href = fallbackHref
+                    } else {
+                      window.open(fallbackHref, '_blank', 'noopener,noreferrer')
+                    }
                   }
                 }
 
