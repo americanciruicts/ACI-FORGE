@@ -10,8 +10,7 @@ from app.core.deps import (
     get_current_active_user,
     require_compare_tool,
     require_aci_excel_migration,
-    require_aci_inventory,
-    require_aci_chat
+    require_aci_inventory
 )
 from app.models.user import User
 from app.schemas.tool import Tool as ToolSchema
@@ -126,32 +125,6 @@ async def execute_aci_inventory(
         "message": "Kosh Tool executed",
         "user": current_user.username,
         "result": "Inventory operation completed",
-        "data": data
-    }
-
-@router.get("/aci-chat/access")
-async def access_aci_chat(
-    current_user: User = Depends(require_aci_chat)
-):
-    """Access ACI Chat Tool"""
-    return {
-        "message": "ACI Chat Tool accessed successfully",
-        "user": current_user.username,
-        "tool": "ACI Chat",
-        "url": "http://acidashboard.aci.local:4000"
-    }
-
-@router.post("/aci-chat/execute")
-async def execute_aci_chat(
-    data: dict,
-    current_user: User = Depends(require_aci_chat)
-):
-    """Execute ACI Chat Tool functionality"""
-    return {
-        "message": "ACI Chat Tool executed",
-        "user": current_user.username,
-        "result": "AI chat session ready",
-        "url": "http://acidashboard.aci.local:4000",
         "data": data
     }
 

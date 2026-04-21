@@ -55,13 +55,6 @@ def create_tools(db: Session):
             "icon": "package"
         },
         {
-            "name": "aci_chat",
-            "display_name": "ACI Chat",
-            "description": "AI-powered chat using OLLAMA (Local LLM)",
-            "route": "/dashboard/tools/aci-chat",
-            "icon": "message-circle"
-        },
-        {
             "name": "suitemaster",
             "display_name": "SuiteMaster",
             "description": "Suite management and control system",

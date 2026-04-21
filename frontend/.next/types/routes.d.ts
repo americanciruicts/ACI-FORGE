@@ -6,7 +6,7 @@ type AppRouteHandlerRoutes = "/api/health"
 type PageRoutes = never
 type LayoutRoutes = "/"
 type RedirectRoutes = never
-type RewriteRoutes = "/api/[[...path]]" | "/health"
+type RewriteRoutes = "/api/[[...path]]" | "/formio/[[...path]]" | "/formsm/[[...path]]" | "/health" | "/longpolling/[[...path]]" | "/web/[[...path]]"
 type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRoutes | AppRouteHandlerRoutes
 
 
@@ -20,9 +20,13 @@ interface ParamMap {
   "/dashboard/profile": {}
   "/dashboard/users": {}
   "/forgot-password": {}
+  "/formio/[[...path]]": { "path"?: string[]; }
+  "/formsm/[[...path]]": { "path"?: string[]; }
   "/health": {}
   "/login": {}
+  "/longpolling/[[...path]]": { "path"?: string[]; }
   "/reset-password": {}
+  "/web/[[...path]]": { "path"?: string[]; }
 }
 
 

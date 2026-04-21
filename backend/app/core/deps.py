@@ -91,4 +91,3 @@ def require_maintenance_or_superuser(current_user: User = Depends(get_current_ac
 require_compare_tool = require_tool_access("compare_tool")
 require_aci_excel_migration = require_tool_access("aci_excel_migration")
 require_aci_inventory = require_tool_access("aci_inventory")
-require_aci_chat = require_tool_access("aci_chat")

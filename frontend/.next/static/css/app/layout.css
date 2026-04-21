@@ -1413,11 +1413,6 @@ video {
   --tw-gradient-to: rgb(240 253 250 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-.from-teal-500 {
-  --tw-gradient-from: #14b8a6 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(20 184 166 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
 .from-teal-600 {
   --tw-gradient-from: #0d9488 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(13 148 136 / 0) var(--tw-gradient-to-position);
@@ -1446,9 +1441,6 @@ video {
 }
 .to-cyan-50 {
   --tw-gradient-to: #ecfeff var(--tw-gradient-to-position);
-}
-.to-cyan-600 {
-  --tw-gradient-to: #0891b2 var(--tw-gradient-to-position);
 }
 .to-emerald-50 {
   --tw-gradient-to: #ecfdf5 var(--tw-gradient-to-position);
@@ -2733,11 +2725,6 @@ body {
   --tw-gradient-to: rgb(204 251 241 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
-.hover\:from-teal-600:hover {
-  --tw-gradient-from: #0d9488 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(13 148 136 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
 .hover\:from-teal-700:hover {
   --tw-gradient-from: #0f766e var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(15 118 110 / 0) var(--tw-gradient-to-position);
@@ -2751,12 +2738,6 @@ body {
 }
 .hover\:to-amber-700:hover {
   --tw-gradient-to: #b45309 var(--tw-gradient-to-position);
-}
-.hover\:to-cyan-100:hover {
-  --tw-gradient-to: #cffafe var(--tw-gradient-to-position);
-}
-.hover\:to-cyan-700:hover {
-  --tw-gradient-to: #0e7490 var(--tw-gradient-to-position);
 }
 .hover\:to-emerald-100:hover {
   --tw-gradient-to: #d1fae5 var(--tw-gradient-to-position);
@@ -3031,9 +3012,6 @@ body {
 .dark\:to-amber-950\/40:is(.dark *) {
   --tw-gradient-to: rgb(69 26 3 / 0.4) var(--tw-gradient-to-position);
 }
-.dark\:to-cyan-950\/40:is(.dark *) {
-  --tw-gradient-to: rgb(8 51 68 / 0.4) var(--tw-gradient-to-position);
-}
 .dark\:to-emerald-950\/40:is(.dark *) {
   --tw-gradient-to: rgb(2 44 34 / 0.4) var(--tw-gradient-to-position);
 }
@@ -3196,9 +3174,6 @@ body {
 }
 .dark\:hover\:to-amber-950\/60:hover:is(.dark *) {
   --tw-gradient-to: rgb(69 26 3 / 0.6) var(--tw-gradient-to-position);
-}
-.dark\:hover\:to-cyan-950\/60:hover:is(.dark *) {
-  --tw-gradient-to: rgb(8 51 68 / 0.6) var(--tw-gradient-to-position);
 }
 .dark\:hover\:to-emerald-950\/60:hover:is(.dark *) {
   --tw-gradient-to: rgb(2 44 34 / 0.6) var(--tw-gradient-to-position);

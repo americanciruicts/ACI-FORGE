@@ -72,14 +72,6 @@ def create_all_tools(db: Session):
             "route": "http://acidashboard.aci.local:6003/",
             "icon": "file-text",
             "is_active": True
-        },
-        {
-            "name": "aci_chat",
-            "display_name": "ACI Chat",
-            "description": "AI-powered chat using OLLAMA (Local LLM)",
-            "route": "http://acidashboard.aci.local:4000/",
-            "icon": "message-circle",
-            "is_active": True
         }
     ]
 
@@ -117,28 +109,28 @@ def create_all_users(db: Session, roles: dict, tools: dict):
         {"full_name": "Khash", "username": "khash", "email": "khash@americancircuits.com", "password": "9OHRzT69Y3AZ", "roles": ["superuser"], "tools": []},
 
         # Manager/Users
-        {"full_name": "Max", "username": "max", "email": "max@americancircuits.com", "password": "CCiYxAAxyR0z", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Ket", "username": "ket", "email": "ket@americancircuits.com", "password": "jzsNCHDdFGJv", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Julia", "username": "julia", "email": "julia@americancircuits.com", "password": "SkqtODKmrLjW", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Praful", "username": "praful", "email": "praful@americancircuits.com", "password": "F1Cur8klq4pe", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Kris", "username": "kris", "email": "kris@americancircuits.com", "password": "RSoX1Qcmc3Tu", "roles": ["user", "manager", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
+        {"full_name": "Max", "username": "max", "email": "max@americancircuits.com", "password": "CCiYxAAxyR0z", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Ket", "username": "ket", "email": "ket@americancircuits.com", "password": "jzsNCHDdFGJv", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Julia", "username": "julia", "email": "julia@americancircuits.com", "password": "SkqtODKmrLjW", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Praful", "username": "praful", "email": "praful@americancircuits.com", "password": "F1Cur8klq4pe", "roles": ["user", "manager"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Kris", "username": "kris", "email": "kris@americancircuits.com", "password": "RSoX1Qcmc3Tu", "roles": ["user", "manager", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
 
         # Regular User
-        {"full_name": "Bob", "username": "bob", "email": "bob@americancircuits.com", "password": "n6mTWAOhVDda", "roles": ["user"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
+        {"full_name": "Bob", "username": "bob", "email": "bob@americancircuits.com", "password": "n6mTWAOhVDda", "roles": ["user"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
 
         # User/Operators
-        {"full_name": "Adam", "username": "adam", "email": "adam@americancircuits.com", "password": "5AdsYCEqrrIg", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Alex", "username": "alex", "email": "alex@americancircuits.com", "password": "zQE3SqCV5zAE", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Pratiksha", "username": "pratiksha", "email": "pratiksha@americancircuits.com", "password": "hUDcvxtL26I9", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Abhishek", "username": "abhishek", "email": "abhi@americancircuits.com", "password": "2umk93LcQ5cX", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
+        {"full_name": "Adam", "username": "adam", "email": "adam@americancircuits.com", "password": "5AdsYCEqrrIg", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Alex", "username": "alex", "email": "alex@americancircuits.com", "password": "zQE3SqCV5zAE", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Pratiksha", "username": "pratiksha", "email": "pratiksha@americancircuits.com", "password": "hUDcvxtL26I9", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Abhishek", "username": "abhishek", "email": "abhi@americancircuits.com", "password": "2umk93LcQ5cX", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
 
         # User/Operator/ITAR
-        {"full_name": "Cathy", "username": "cathy", "email": "cathy@americancircuits.com", "password": "KOLCsB4kTzow", "roles": ["user", "operator", "itar"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        {"full_name": "Larry", "username": "larry", "email": "larry@americancircuits.com", "password": "AaWtgE1hRECG", "roles": ["user", "manager", "operator", "itar"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
+        {"full_name": "Cathy", "username": "cathy", "email": "cathy@americancircuits.com", "password": "KOLCsB4kTzow", "roles": ["user", "operator", "itar"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        {"full_name": "Larry", "username": "larry", "email": "larry@americancircuits.com", "password": "AaWtgE1hRECG", "roles": ["user", "manager", "operator", "itar"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
 
         # Additional User/Operators
-        {"full_name": "LeeAnn", "username": "leeann", "email": "leeann@americancircuits.com", "password": "iEAiQtPuHdQA", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},
-        # {"full_name": "Bruce", "username": "bruce", "email": "bruce@americancircuits.com", "password": "PENDING", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration", "aci_chat"]},  # Uncomment and add password when available
+        {"full_name": "LeeAnn", "username": "leeann", "email": "leeann@americancircuits.com", "password": "iEAiQtPuHdQA", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},
+        # {"full_name": "Bruce", "username": "bruce", "email": "bruce@americancircuits.com", "password": "PENDING", "roles": ["user", "operator"], "tools": ["bom_compare", "aci_inventory", "aci_excel_migration"]},  # Uncomment and add password when available
     ]
 
     print("👥 Creating/updating all users...")

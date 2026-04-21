@@ -90,8 +90,8 @@ def update_tools():
             else:
                 print("ℹ️  bom_tool_suite already exists")
 
-        # Remove any leftover tools that aren't in the homepage 5
-        allowed = ['bom_tool_suite', 'aci_inventory', 'aci_chat', 'suitemaster', 'nexus']
+        # Remove any leftover tools that aren't in the homepage 4
+        allowed = ['bom_tool_suite', 'aci_inventory', 'suitemaster', 'nexus']
         leftover_tools = db.query(Tool).filter(~Tool.name.in_(allowed)).all()
         for t in leftover_tools:
             print(f"Removing leftover tool: {t.name} ({t.display_name})")

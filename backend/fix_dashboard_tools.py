@@ -2,7 +2,6 @@
 Fix dashboard tools to show the correct ones:
 - Kosh (Inventory Management)
 - ACI Excel Migration
-- ACI Chatbot (Ollama UI)
 - BOM Compare
 """
 
@@ -44,14 +43,6 @@ def fix_dashboard_tools(db: Session):
             "description": "Excel data migration and processing tool",
             "route": "/dashboard/tools/excel-migration",
             "icon": "file-spreadsheet",
-            "is_active": True
-        },
-        {
-            "name": "aci_chat",
-            "display_name": "ACI Chat",
-            "description": "AI-powered chat using OLLAMA (Local LLM)",
-            "route": "http://acidashboard.aci.local:4000/",
-            "icon": "message-circle",
             "is_active": True
         },
         {

@@ -54,7 +54,6 @@ ON CONFLICT (name) DO NOTHING;
 INSERT INTO tools (name, display_name, description, route, icon, is_active) VALUES
 ('bom_tool_suite', 'BOM Tool Suite', 'BOM Tool Suite for Bill of Materials management', '/tools/bom-tool-suite', 'compare', true),
 ('aci_inventory', 'Kosh', 'Inventory Management', '/tools/aci-inventory', 'package', true),
-('aci_chatgpt', 'ACI ChatGPT', 'AI-powered chat and analysis tool', '/tools/aci-chatgpt', 'message-circle', true),
 ('suitemaster', 'SuiteMaster', 'Suite management and control system', '/tools/suitemaster', 'layout', true),
 ('nexus', 'NEXUS', 'Traveler Management System', '/tools/nexus', 'hexagon', true)
 ON CONFLICT (name) DO NOTHING;

@@ -398,8 +398,16 @@ export default function DashboardPage() {
 
                   // Open the window synchronously during the click to preserve the
                   // user-gesture chain. Mobile browsers (iOS Safari, Android Chrome)
-                  // block window.open called after an await.
-                  const win = window.open('about:blank', '_blank', 'noopener,noreferrer')
+                  // block window.open called after an await. We intentionally omit
+                  // `noopener` here because it forces window.open to return null,
+                  // leaving us unable to navigate the new tab (which caused the
+                  // SSO redirect to hijack the current FORGE tab and left the new
+                  // tab stuck on about:blank). We null out `opener` manually below
+                  // to preserve the security guarantee.
+                  const win = window.open('about:blank', '_blank')
+                  if (win) {
+                    try { win.opener = null } catch {}
+                  }
 
                   try {
                     let redirectUrl: string
