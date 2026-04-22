@@ -67,8 +67,8 @@ def update_tools():
         compare_tool = db.query(Tool).filter(Tool.name == 'compare_tool').first()
         if compare_tool:
             compare_tool.name = "bom_tool_suite"
-            compare_tool.display_name = "BOM Tool Suite"
-            compare_tool.description = "BOM Tool Suite for Bill of Materials management"
+            compare_tool.display_name = "Tool Suite"
+            compare_tool.description = "Tool Suite for Bill of Materials management"
             compare_tool.icon = "arrow-left-right"
             db.commit()
             print("✅ compare_tool renamed to bom_tool_suite")
@@ -78,15 +78,15 @@ def update_tools():
             if not bom_tool:
                 bom_tool = Tool(
                     name="bom_tool_suite",
-                    display_name="BOM Tool Suite",
-                    description="BOM Tool Suite for Bill of Materials management",
+                    display_name="Tool Suite",
+                    description="Tool Suite for Bill of Materials management",
                     route="/dashboard/tools/compare",
                     icon="arrow-left-right",
                     is_active=True
                 )
                 db.add(bom_tool)
                 db.commit()
-                print("✅ BOM Tool Suite added")
+                print("✅ Tool Suite added")
             else:
                 print("ℹ️  bom_tool_suite already exists")
 

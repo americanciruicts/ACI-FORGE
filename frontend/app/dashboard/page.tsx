@@ -314,8 +314,8 @@ export default function DashboardPage() {
                         textClass: 'text-gray-600 dark:text-gray-400',
                         buttonClass: 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700',
                         icon: ArrowLeftRight,
-                        title: 'BOM Tool Suite',
-                        description: 'BOM Tool Suite for Bill of Materials management'
+                        title: 'Tool Suite',
+                        description: 'Tool Suite for Bill of Materials management'
                       }
                     case 'aci_inventory':
                     case 'aci inventory':

@@ -42,8 +42,8 @@ def create_tools(db: Session):
     tools_data = [
         {
             "name": "bom_tool_suite",
-            "display_name": "BOM Tool Suite",
-            "description": "BOM Tool Suite for Bill of Materials management",
+            "display_name": "Tool Suite",
+            "description": "Tool Suite for Bill of Materials management",
             "route": "/dashboard/tools/compare",
             "icon": "arrow-left-right"
         },
