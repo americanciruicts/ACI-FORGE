@@ -307,15 +307,16 @@ export default function DashboardPage() {
                         href: 'https://bom-tool.vercel.app/',
                         localHref: 'http://acidashboard.aci.local:8081/',
                         ssoApp: null,
-                        bgClass: 'bg-gradient-to-br from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 dark:from-orange-950/40 dark:to-amber-950/40 dark:hover:from-orange-950/60 dark:hover:to-amber-950/60',
-                        borderClass: 'border-orange-200 hover:border-orange-300 dark:border-orange-800/50 dark:hover:border-orange-700/60',
-                        iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600',
+                        bgClass: 'bg-gradient-to-br from-indigo-50 to-fuchsia-50 hover:from-indigo-100 hover:to-fuchsia-100 dark:from-indigo-950/40 dark:to-fuchsia-950/40 dark:hover:from-indigo-950/60 dark:hover:to-fuchsia-950/60',
+                        borderClass: 'border-indigo-200 hover:border-indigo-300 dark:border-indigo-800/50 dark:hover:border-indigo-700/60',
+                        // No backplate — the SVG carries its own gradient backplate.
+                        iconBgClass: '',
                         titleClass: 'text-gray-900 dark:text-gray-100',
                         textClass: 'text-gray-600 dark:text-gray-400',
-                        buttonClass: 'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700',
-                        icon: ArrowLeftRight,
+                        buttonClass: 'bg-gradient-to-r from-indigo-500 via-violet-600 to-fuchsia-600 hover:from-indigo-600 hover:via-violet-700 hover:to-fuchsia-700',
+                        icon: 'custom-toolsuite',
                         title: 'Tool Suite',
-                        description: 'Tool Suite for Bill of Materials management'
+                        description: 'Convert PDF/JPG/PNG BOMs to Excel and compare BOMs with AI-assisted column detection'
                       }
                     case 'aci_inventory':
                     case 'aci inventory':
@@ -324,12 +325,12 @@ export default function DashboardPage() {
                         href: 'https://aci-kosh.vercel.app/',
                         localHref: 'http://acidashboard.aci.local:5002/',
                         ssoApp: 'kosh',
-                        bgClass: 'bg-gradient-to-br from-purple-50 to-violet-50 hover:from-purple-100 hover:to-violet-100 dark:from-purple-950/40 dark:to-violet-950/40 dark:hover:from-purple-950/60 dark:hover:to-violet-950/60',
-                        borderClass: 'border-purple-200 hover:border-purple-300 dark:border-purple-800/50 dark:hover:border-purple-700/60',
+                        bgClass: 'bg-gradient-to-br from-sky-50 to-cyan-50 hover:from-sky-100 hover:to-cyan-100 dark:from-sky-950/40 dark:to-cyan-950/40 dark:hover:from-sky-950/60 dark:hover:to-cyan-950/60',
+                        borderClass: 'border-sky-200 hover:border-sky-300 dark:border-sky-800/50 dark:hover:border-sky-700/60',
                         iconBgClass: '',
                         titleClass: 'text-gray-900 dark:text-gray-100',
                         textClass: 'text-gray-600 dark:text-gray-400',
-                        buttonClass: 'bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700',
+                        buttonClass: 'bg-gradient-to-r from-sky-500 to-cyan-600 hover:from-sky-600 hover:to-cyan-700',
                         icon: 'custom-kosh',
                         title: 'KOSH',
                         description: 'Inventory management system'
@@ -337,8 +338,8 @@ export default function DashboardPage() {
                     case 'suitemaster':
                     case 'suite master':
                       return {
-                        href: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
-                        localHref: 'https://aci.lmhosted.com/web/login?redirect=%2Fsuitemaster%3F',
+                        href: 'https://aci.lmhosted.com/rithomiq/apps_drawer_view',
+                        localHref: 'https://aci.lmhosted.com/rithomiq/apps_drawer_view',
                         ssoApp: null,
                         bgClass: 'bg-gradient-to-br from-blue-50 to-sky-50 hover:from-blue-100 hover:to-sky-100 dark:from-blue-950/40 dark:to-sky-950/40 dark:hover:from-blue-950/60 dark:hover:to-sky-950/60',
                         borderClass: 'border-blue-200 hover:border-blue-300 dark:border-blue-800/50 dark:hover:border-blue-700/60',
@@ -470,6 +471,14 @@ export default function DashboardPage() {
                           <Image
                             src="/suitemaster-logo.svg"
                             alt="SuiteMaster Logo"
+                            width={80}
+                            height={80}
+                            className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
+                          />
+                        ) : IconComponent === 'custom-toolsuite' ? (
+                          <Image
+                            src="/toolsuite-logo.svg"
+                            alt="Tool Suite Logo"
                             width={80}
                             height={80}
                             className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20"
