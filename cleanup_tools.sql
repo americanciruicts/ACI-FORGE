@@ -5,7 +5,7 @@
 DELETE FROM user_tools 
 WHERE tool_id IN (
     SELECT id FROM tools WHERE name IN ('x_tool', 'y_tool')
-);
+);                    
 
 -- Remove the tools themselves
 DELETE FROM tools WHERE name IN ('x_tool', 'y_tool');

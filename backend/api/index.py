@@ -255,7 +255,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    
+
     user = get_user_by_username(db, username=username)
     if user is None:
         raise credentials_exception
@@ -967,8 +967,6 @@ async def send_credentials_to_user(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send credentials: {str(e)}"
         )
-
-
 # ---------------------------------------------------------------------------
 # Notification endpoints (super_admin only)
 # ---------------------------------------------------------------------------
@@ -1213,7 +1211,7 @@ async def validate_sso_token(request: SSOValidateRequest):
 
         if payload.get("type") != "sso":
             raise HTTPException(status_code=401, detail="Invalid token type")
-
+    
         return SSOValidateResponse(
             valid=True,
             username=payload["sub"],
