@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Wrench } from 'lucide-react'
 import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
-import Breadcrumbs from '@/components/Breadcrumbs'
 
 // The form is served by the lmhosted Odoo formio service, but reverse-proxied
 // through FORGE so the iframe loads same-origin. This avoids the cross-origin
@@ -45,36 +43,15 @@ export default function SubmitMaintenancePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col h-screen bg-white dark:bg-gray-900">
       <Navbar user={user} />
 
-      <main className="max-w-5xl mx-auto px-4 py-6">
-        <Breadcrumbs
-          items={[
-            { label: 'Maintenance', href: '/dashboard/maintenance/submit' },
-            { label: 'Submit Request' },
-          ]}
-        />
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Wrench className="h-6 w-6 text-[#0066B3]" />
-            Submit Maintenance Request
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Fill out the form below to submit a maintenance request
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <iframe
-            src={MAINTENANCE_FORM_SRC}
-            width="100%"
-            height="700"
-            style={{ border: 'none', minHeight: '700px', display: 'block' }}
-            title="Maintenance Request Form"
-          />
-        </div>
-      </main>
+      <iframe
+        src={MAINTENANCE_FORM_SRC}
+        className="flex-1 w-full"
+        style={{ border: 'none', display: 'block' }}
+        title="Maintenance Request Form"
+      />
     </div>
   )
 }
