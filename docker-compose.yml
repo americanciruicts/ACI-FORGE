@@ -34,7 +34,7 @@ services:
       - ./backend/.env
     environment:
       - NEXUS_DATABASE_URL=postgresql://nexus_user:postgres@aci-database:5432/nexus
-      - KOSH_DATABASE_URL=postgresql://stockpick_user:stockpick_pass@aci-database:5432/kosh
+      - KOSH_DATABASE_URL=postgresql://aci:Pr1xtjxb3jUo@aci-database:5432/kosh
     depends_on:
       redis:
         condition: service_started

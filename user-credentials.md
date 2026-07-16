@@ -22,8 +22,8 @@
 | alex@americancircuits.com | Alex | zQE3SqCV5zAE | user, operator | NEXUS, BOM, KOSH |
 | pratiksha@americancircuits.com | Pratiksha | hUDcvxtL26I9 | user, operator | BOM, NEXUS, KOSH |
 | abhishek@americancircuits.com | Abhishek | 2umk93LcQ5cX | operator, user | NEXUS, BOM, KOSH |
-| cathy@americancircuits.com | Cathy | KOLCsB4kTzow | user, operator | BOM, NEXUS, KOSH |
-| larry@americancircuits.com | Larry | AaWtgE1hRECG | manager, operator | KOSH, BOM, NEXUS |
+| cathy@americancircuits.com | Cathy | C@thy@12aci | user, operator | BOM, NEXUS, KOSH |
+| larry@americancircuits.com | Larry | L@rry24aci | manager, operator | KOSH, BOM, NEXUS |
 | rob@americancircuits.com | Rob | *(NEXUS password)* | superuser | All Apps |
 | juliar@americancircuits.com | Julia R | *(NEXUS password)* | superuser | All Apps |
 | stacy.hbtax@gmail.com | Stacy Thomas | *(NEXUS password)* | manager | KOSH, SuiteMaster, NEXUS, Chat, BOM |
