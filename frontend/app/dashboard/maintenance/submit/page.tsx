@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import { User, clearUserSession, validateSession } from '@/lib/auth'
 import Navbar from '@/components/Navbar'
 
-// The form is served by the lmhosted Odoo formio service, but reverse-proxied
+// The form is served by the rithomiq Odoo formio service, but reverse-proxied
 // through FORGE so the iframe loads same-origin. This avoids the cross-origin
 // cookie/session blocking that was causing silent submission failures with a
-// direct https://aci.lmhosted.com iframe src.
+// direct https://aci.rithomiq.com iframe src.
 const MAINTENANCE_FORM_SRC =
   '/formsm/public/form/new/864c8594-4dfc-4658-b403-c0b2bceecd77'
 
